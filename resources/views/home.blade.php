@@ -3,54 +3,45 @@
 @section('title', 'Home - Todana')
 
 @section('content')
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-12">
-            <img src="{{ asset('images/todana/banner.png') }}" class="img-fluid rounded shadow" alt="Banner">
-        </div>
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+        <img src="{{ asset('images/todana/banner.png') }}" class="w-full rounded-lg shadow-lg" alt="Banner">
     </div>
 
-    <div class="text-center mb-5">
-        <h2>Our Collections</h2>
-        <p class="text-muted">Temukan produk terbaik untuk kebutuhan Anda</p>
+    <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold mb-2">Our Collections</h2>
+        <p class="text-gray-600">Temukan produk terbaik untuk kebutuhan Anda</p>
     </div>
 
-    <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <img src="{{ asset('images/todana/buku1.jpg') }}" class="card-img-top" alt="Product">
-                <div class="card-body">
-                    <h5 class="card-title">Product 1</h5>
-                    <p class="card-text">Deskripsi produk singkat</p>
-                    <a href="{{ route('products.show', 1) }}" class="btn btn-primary">Lihat Detail</a>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            <img src="{{ asset('images/todana/buku1.jpg') }}" class="w-full h-64 object-cover" alt="Product">
+            <div class="p-4">
+                <h5 class="text-lg font-semibold mb-2">Product 1</h5>
+                <p class="text-gray-600 text-sm mb-3">Deskripsi produk singkat</p>
+                <a href="{{ route('products.show', 1) }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">Lihat Detail</a>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <img src="{{ asset('images/todana/buku2.jpg') }}" class="card-img-top" alt="Product">
-                <div class="card-body">
-                    <h5 class="card-title">Product 2</h5>
-                    <p class="card-text">Deskripsi produk singkat</p>
-                    <a href="{{ route('products.show', 2) }}" class="btn btn-primary">Lihat Detail</a>
-                </div>
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            <img src="{{ asset('images/todana/buku2.jpg') }}" class="w-full h-64 object-cover" alt="Product">
+            <div class="p-4">
+                <h5 class="text-lg font-semibold mb-2">Product 2</h5>
+                <p class="text-gray-600 text-sm mb-3">Deskripsi produk singkat</p>
+                <a href="{{ route('products.show', 2) }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">Lihat Detail</a>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <img src="{{ asset('images/todana/buku3.jpg') }}" class="card-img-top" alt="Product">
-                <div class="card-body">
-                    <h5 class="card-title">Product 3</h5>
-                    <p class="card-text">Deskripsi produk singkat</p>
-                    <a href="{{ route('products.show', 3) }}" class="btn btn-primary">Lihat Detail</a>
-                </div>
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            <img src="{{ asset('images/todana/buku3.jpg') }}" class="w-full h-64 object-cover" alt="Product">
+            <div class="p-4">
+                <h5 class="text-lg font-semibold mb-2">Product 3</h5>
+                <p class="text-gray-600 text-sm mb-3">Deskripsi produk singkat</p>
+                <a href="{{ route('products.show', 3) }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">Lihat Detail</a>
             </div>
         </div>
     </div>
 
     <div class="text-center">
-        <a href="{{ route('products.index') }}" class="btn btn-outline-primary">Lihat Semua Produk</a>
+        <a href="{{ route('products.index') }}" class="inline-block border-2 border-blue-600 text-blue-600 px-6 py-2 rounded hover:bg-blue-600 hover:text-white transition-colors">Lihat Semua Produk</a>
     </div>
 </div>
 @endsection
-
