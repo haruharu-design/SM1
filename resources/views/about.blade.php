@@ -12,7 +12,7 @@
         <div class="flex flex-col md:flex-row gap-6 mb-8">
             <img src="{{ asset('images/todana/about-us.png') }}" class="w-40 h-auto" alt="About Us">
             <div>
-                <p class="text-xl font-bold mb-4">Selamat datang di Todana - Toko Online Sederhana</p>
+                <p class="text-xl font-bold mb-4">Selamat datang di Toko Sinar Mentari Pontianak</p>
                 <p class="text-gray-700 mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
                 <p class="text-gray-700">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
             </div>
@@ -35,3 +35,4 @@
     </div>
 </div>
 @endsection
+
