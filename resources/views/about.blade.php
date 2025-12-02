@@ -12,25 +12,19 @@
         <div class="flex flex-col md:flex-row gap-6 mb-8">
             <img src="{{ asset('images/todana/about-us.png') }}" class="w-40 h-auto" alt="About Us">
             <div>
-                <p class="text-xl font-bold mb-4">Selamat datang di Toko Sinar Mentari Pontianak</p>
-                <p class="text-gray-700 mb-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                <p class="text-gray-700">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <p class="text-xl font-bold mb-4">Selamat datang di Toko Sinar Mentari</p>
+                <p class="text-gray-700 mb-3">Kami menyediakan berbagai kebutuhan alat tulis kantor (ATK) lengkap dan berkualitas dengan harga terjangkau. Hadir dengan pelayanan ramah dan pilihan produk yang variatif, kami siap menjadi tempat terbaik untuk memenuhi kebutuhan sekolah, kerja, maupun usaha Anda.</p>
             </div>
         </div>
     </div>
 
     <!-- Section visi misi -->
     <div class="bg-gray-100 p-6 rounded-lg">
-        <h3 class="text-2xl font-bold mb-4">Visi & Misi</h3>
-        <!-- Visi -->
-        <h4 class="text-xl font-bold mt-4 mb-2">Visi</h4>
-        <p class="text-gray-700 mb-4">Menjadi toko online terpercaya dan terdepan dalam memberikan pengalaman berbelanja yang mudah dan nyaman.</p>
-        <!-- Misi -->
-        <h4 class="text-xl font-bold mt-4 mb-2">Misi</h4>
-        <ul class="list-disc list-inside text-gray-700 space-y-2">
-            <li>Menyediakan produk berkualitas dengan harga terjangkau</li>
-            <li>Memberikan pelayanan terbaik untuk kepuasan customer</li>
-            <li>Mengembangkan teknologi untuk kemudahan transaksi</li>
+        <h3 class="text-2xl font-bold mb-4">Komitmen Kami</h3>
+        <!-- isi -->
+        <ul class="list-disc list-inside text-gray-700 space-y-2 text-justify leading-relaxed">
+            <li>Toko Sinar Mentari hadir sebagai tempat belanja ATK yang lengkap, terjangkau, dan mudah dijangkau oleh siapa pun. Kami menghadirkan berbagai perlengkapan sekolah dan kantor dengan kualitas terbaik, didukung pelayanan ramah agar setiap kunjungan terasa menyenangkan. Berawal dari kebutuhan masyarakat akan toko ATK yang praktis dan terpercaya.</li>
+           <li>Kami akan terus berkembang menjadi pilihan utama bagi pelanggan yang mencari produk variatif, harga bersahabat, dan pengalaman belanja yang nyaman. Dengan komitmen untuk selalu memberikan layanan yang cepat, responsif, dan dapat diandalkan, kami siap menjadi mitra terbaik dalam memenuhi kebutuhan Anda setiap hari.”</li>
         </ul>
     </div>
 </div>

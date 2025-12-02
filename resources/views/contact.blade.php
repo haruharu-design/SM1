@@ -12,9 +12,9 @@
         <!-- Card informasi kontak -->
         <div class="bg-white rounded-lg shadow p-6 mb-6">
             <h5 class="text-xl font-bold mb-4">Informasi Kontak</h5>
-            <p class="text-gray-700 mb-2"><strong>Email:</strong> info@todana.com</p>
-            <p class="text-gray-700 mb-2"><strong>Telepon:</strong> +62 123 456 789</p>
-            <p class="text-gray-700"><strong>Alamat:</strong> Jl. Contoh No. 123, Jakarta</p>
+            <p class="text-gray-700 mb-2"><strong>Email:</strong> SinarMentari@gamil.com</p>
+            <p class="text-gray-700 mb-2"><strong>Telepon:</strong> +62-815-2844-2245</p>
+            <p class="text-gray-700"><strong>Alamat:</strong> Jl. Putri Candramidi, deretan Masjid Mujahidin, Kota Baru Pontianak</p>
         </div>
 
         <!-- Card form pesan -->
