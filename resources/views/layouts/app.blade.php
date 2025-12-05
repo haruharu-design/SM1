@@ -104,7 +104,7 @@
     <!-- Footer -->
     <footer class="bg-gray-100 mt-12">
         <div class="max-w-7xl mx-auto px-4 py-4">
-            <p class="text-center text-gray-600">&copy; {{ date('Y') }} Todana. - Toko Online Sederhana</p>
+            <p class="text-center text-gray-600">&copy; {{ date('Y') }} SM. - Toko Sinar Mentari Pontianak</p>
         </div>
     </footer>
 
