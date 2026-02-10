@@ -35,7 +35,12 @@
                 <!-- Input password -->
                 <div class="mb-4">
                     <label class="block text-sm font-bold mb-2">Password</label>
-                    <input type="password" class="w-full px-4 py-2 border rounded @error('password') border-red-500 @enderror" name="password" required>
+                    <div class="relative">
+                        <input type="password" id="password" class="w-full px-4 py-2 pr-12 border rounded @error('password') border-red-500 @enderror" name="password" required>
+                        <button type="button" onclick="togglePassword('password', 'eye-password')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" title="Tampilkan/Sembunyikan password">
+                            <span id="eye-password">👁️</span>
+                        </button>
+                    </div>
                     @error('password')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -44,7 +49,12 @@
                 <!-- Input konfirmasi password -->
                 <div class="mb-4">
                     <label class="block text-sm font-bold mb-2">Konfirmasi Password</label>
-                    <input type="password" class="w-full px-4 py-2 border rounded" name="password_confirmation" required>
+                    <div class="relative">
+                        <input type="password" id="password_confirmation" class="w-full px-4 py-2 pr-12 border rounded" name="password_confirmation" required>
+                        <button type="button" onclick="togglePassword('password_confirmation', 'eye-password-confirm')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" title="Tampilkan/Sembunyikan password">
+                            <span id="eye-password-confirm">👁️</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Tombol daftar -->
@@ -58,4 +68,17 @@
         </div>
     </div>
 </div>
+<script>
+function togglePassword(inputId, eyeId) {
+    var input = document.getElementById(inputId);
+    var eye = document.getElementById(eyeId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        eye.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        eye.textContent = '👁️';
+    }
+}
+</script>
 @endsection

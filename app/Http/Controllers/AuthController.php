@@ -22,7 +22,18 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
+            $user = Auth::user();
+            if ($user->isSuspended()) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Akun ini ditangguhkan. Hubungi administrator.',
+                ])->withInput();
+            }
             $request->session()->regenerate();
+            // Admin masuk ke dashboard admin, user masuk ke halaman utama
+            if ($user->isAdmin()) {
+                return redirect()->intended('/admin');
+            }
             return redirect()->intended(route('home'));
         }
 

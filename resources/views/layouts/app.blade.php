@@ -43,6 +43,9 @@
                 <!-- Menu kanan -->
                 <div class="hidden md:flex items-center space-x-4 text-white">
                     @auth
+                        <a href="{{ route('cart.index') }}" class="text-sm hover:underline">Keranjang</a>
+                        <a href="{{ route('wishlist.index') }}" class="text-sm hover:underline">Wishlist</a>
+                        <a href="{{ route('orders.index') }}" class="text-sm hover:underline">Pesanan</a>
                         <a href="{{ route('profile') }}" class="text-sm hover:underline">Profile</a>
                         @if(auth()->user()->isAdmin())
                             <a href="/admin" class="text-sm hover:underline">Admin Panel</a>
@@ -81,6 +84,9 @@
                 <a href="{{ route('contact') }}" class="block px-3 py-2">Contact</a>
 
                 @auth
+                    <a href="{{ route('cart.index') }}" class="block px-3 py-2">Keranjang</a>
+                    <a href="{{ route('wishlist.index') }}" class="block px-3 py-2">Wishlist</a>
+                    <a href="{{ route('orders.index') }}" class="block px-3 py-2">Pesanan</a>
                     <a href="{{ route('profile') }}" class="block px-3 py-2">Profile</a>
                     @if(auth()->user()->isAdmin())
                         <a href="/admin" class="block px-3 py-2">Admin Panel</a>

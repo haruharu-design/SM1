@@ -79,59 +79,76 @@
     </div>
 
     <!-- ===================== -->
-    <!-- Grid Produk (Placeholder) -->
+    <!-- Grid Produk -->
     <!-- ===================== -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
 
-        @for ($i = 1; $i <= 6; $i++)
-        <div class="bg-white/80 backdrop-blur-sm border border-gray-200 
-                    rounded-xl shadow-lg p-4 text-gray-900">
+        @forelse($products as $product)
+        <div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg p-4 text-gray-900 hover:shadow-xl transition-shadow relative">
+            @auth
+            <form action="{{ route('wishlist.toggle') }}" method="POST" class="absolute top-2 right-2 z-10">
+                @csrf
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                <button type="submit" class="p-1 rounded-full bg-white/80 shadow">
+                    <span class="text-xl">{{ in_array($product->id, $wishlistIds ?? []) ? '❤️' : '🤍' }}</span>
+                </button>
+            </form>
+            @endauth
 
-            <!-- Placeholder gambar -->
-            <div class="w-full h-64 rounded-lg mb-4 
+            <div class="w-full h-64 rounded-lg mb-4 overflow-hidden
                         bg-gradient-to-br from-gray-200 to-gray-300 
-                        flex items-center justify-center 
-                        text-gray-500 text-sm italic">
-                Gambar produk akan ditampilkan di sini
+                        flex items-center justify-center">
+                @if($product->image)
+                    <img src="{{ asset('storage/' . $product->image) }}" 
+                         alt="{{ $product->name }}"
+                         class="w-full h-full object-cover">
+                @else
+                    <span class="text-gray-500 text-sm italic">Gambar produk</span>
+                @endif
             </div>
 
-            <!-- Placeholder nama -->
-            <h5 class="text-lg font-semibold mb-2 text-gray-500 italic">
-                Nama produk
+            <h5 class="text-lg font-semibold mb-2 text-gray-900">
+                {{ $product->name }}
             </h5>
 
-            <!-- Placeholder deskripsi -->
-            <p class="text-gray-400 text-sm mb-3 italic">
-                Isi deskripsi produk
+            <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+                {{ Str::limit($product->description, 60) ?: 'Deskripsi produk' }}
             </p>
 
-            <!-- Placeholder harga -->
-            <p class="text-gray-500 font-medium mb-4 italic">
-                Harga produk
+            <p class="text-gray-900 font-bold mb-4">
+                Rp {{ number_format($product->price, 0, ',', '.') }}
             </p>
 
-            <!-- Tombol -->
-            <button 
-                class="bg-gradient-to-r from-red-500 to-blue-500 
-                       text-white px-4 py-2 rounded-lg 
-                       opacity-60 cursor-not-allowed">
-                Lihat Detail
-            </button>
+            <div class="flex gap-2 flex-wrap">
+                <a href="{{ route('products.show', $product->id) }}"
+                   class="inline-block bg-gradient-to-r from-red-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                    Lihat Detail
+                </a>
+                @auth
+                <form action="{{ route('cart.add') }}" method="POST" class="inline">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="border border-gray-600 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100">+ Keranjang</button>
+                </form>
+                @endauth
+            </div>
         </div>
-        @endfor
+        @empty
+        <div class="col-span-full text-center py-8 text-gray-500 italic">
+            Belum ada produk. Silakan tambah produk di Admin Panel.
+        </div>
+        @endforelse
 
     </div>
 
-    <!-- ===================== -->
     <!-- Tombol Lihat Semua -->
-    <!-- ===================== -->
     <div class="text-center">
-        <button 
-            class="border-2 border-gray-800 text-gray-800 
-                   px-6 py-2 rounded-lg 
-                   opacity-60 cursor-not-allowed">
+        <a href="{{ route('products.index') }}"
+           class="inline-block border-2 border-gray-800 text-gray-800 
+                  px-6 py-2 rounded-lg hover:bg-gray-800 hover:text-white transition-colors">
             Lihat Semua Produk
-        </button>
+        </a>
     </div>
 
 </div>
