@@ -78,6 +78,49 @@
         </p>
     </div>
 
+    {{-- Rekomendasi Personalisasi (jika ada) --}}
+    @if(isset($recommendations) && $recommendations->isNotEmpty())
+    <div class="mb-12">
+        <h3 class="text-xl font-bold mb-4 text-gray-900">Rekomendasi untuk Anda</h3>
+        <p class="text-gray-600 text-sm mb-4">Berdasarkan minat dan riwayat belanja Anda</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            @foreach($recommendations->take(6) as $product)
+            <div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg p-4 text-gray-900 hover:shadow-xl transition-shadow relative">
+                @auth
+                <form action="{{ route('wishlist.toggle') }}" method="POST" class="absolute top-2 right-2 z-10">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                    <button type="submit" class="p-1 rounded-full bg-white/80 shadow">
+                        <span class="text-xl">{{ in_array($product->id, $wishlistIds ?? []) ? '❤️' : '🤍' }}</span>
+                    </button>
+                </form>
+                @endauth
+                <div class="w-full h-48 rounded-lg mb-4 overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                    @if($product->image)
+                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                    @else
+                        <span class="text-gray-500 text-sm italic">Gambar produk</span>
+                    @endif
+                </div>
+                <h5 class="text-lg font-semibold mb-2 text-gray-900">{{ $product->name }}</h5>
+                <p class="text-gray-900 font-bold mb-4">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                <div class="flex gap-2">
+                    <a href="{{ route('products.show', $product->id) }}" class="inline-block bg-gradient-to-r from-red-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm">Lihat Detail</a>
+                    @auth
+                    <form action="{{ route('cart.add') }}" method="POST" class="inline">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="border border-gray-600 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 text-sm">+ Keranjang</button>
+                    </form>
+                    @endauth
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <!-- ===================== -->
     <!-- Grid Produk -->
     <!-- ===================== -->
@@ -85,6 +128,9 @@
 
         @forelse($products as $product)
         <div class="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg p-4 text-gray-900 hover:shadow-xl transition-shadow relative">
+            @if($product->category)
+            <span class="absolute top-2 left-2 text-xs px-2 py-0.5 rounded bg-gray-200/90 text-gray-600 z-10">{{ $product->category->name }}</span>
+            @endif
             @auth
             <form action="{{ route('wishlist.toggle') }}" method="POST" class="absolute top-2 right-2 z-10">
                 @csrf

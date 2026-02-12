@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
+use App\Models\Category;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -45,8 +46,12 @@ class ProductResource extends Resource
                     ->numeric()
                     ->minValue(0)
                     ->default(0),
-                Forms\Components\TextInput::make('category')
-                    ->maxLength(255),
+                Forms\Components\Select::make('category_id')
+                    ->label('Kategori')
+                    ->relationship('category', 'name')
+                    ->required()
+                    ->searchable()
+                    ->preload(),
                 Forms\Components\FileUpload::make('image')
                     ->image()
                     ->directory('products')
@@ -63,7 +68,8 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('category')
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Kategori')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')

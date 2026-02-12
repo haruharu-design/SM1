@@ -72,6 +72,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Review::class);
     }
 
+    public function productViews(): HasMany
+    {
+        return $this->hasMany(ProductView::class);
+    }
+
     /**
      * Check if user can access Filament admin panel
      */

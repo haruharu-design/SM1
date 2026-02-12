@@ -58,7 +58,7 @@
 
             @if($product->category)
             <p class="text-gray-500 mb-4">
-                {{ $product->category }}
+                <span class="inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-700">{{ $product->category->name }}</span>
             </p>
             @endif
 
@@ -191,5 +191,51 @@
         <p class="mt-4 text-gray-500 text-sm">Login untuk memberikan ulasan.</p>
         @endauth
     </div>
+
+    {{-- Produk Terkait (berdasarkan kategori yang sama) --}}
+    @if($relatedProducts->isNotEmpty())
+    <div class="mt-10 bg-white/80 rounded-xl shadow-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Produk Terkait</h2>
+        <p class="text-gray-600 text-sm mb-4">Produk lain dalam kategori {{ $product->category?->name ?? 'yang sama' }}</p>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            @foreach($relatedProducts as $rel)
+            <a href="{{ route('products.show', $rel->id) }}" class="block border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                <div class="aspect-square rounded bg-gray-100 mb-2 overflow-hidden flex items-center justify-center">
+                    @if($rel->image)
+                        <img src="{{ asset('storage/' . $rel->image) }}" alt="{{ $rel->name }}" class="w-full h-full object-cover">
+                    @else
+                        <span class="text-gray-400 text-xs">Foto</span>
+                    @endif
+                </div>
+                <p class="text-sm font-medium truncate">{{ $rel->name }}</p>
+                <p class="text-sm font-bold text-gray-800">Rp {{ number_format($rel->price, 0, ',', '.') }}</p>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Rekomendasi Personalisasi --}}
+    @if(isset($personalizedRecommendations) && $personalizedRecommendations->isNotEmpty())
+    <div class="mt-10 bg-white/80 rounded-xl shadow-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Rekomendasi untuk Anda</h2>
+        <p class="text-gray-600 text-sm mb-4">Berdasarkan perilaku belanja dan minat Anda</p>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            @foreach($personalizedRecommendations as $rec)
+            <a href="{{ route('products.show', $rec->id) }}" class="block border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                <div class="aspect-square rounded bg-gray-100 mb-2 overflow-hidden flex items-center justify-center">
+                    @if($rec->image)
+                        <img src="{{ asset('storage/' . $rec->image) }}" alt="{{ $rec->name }}" class="w-full h-full object-cover">
+                    @else
+                        <span class="text-gray-400 text-xs">Foto</span>
+                    @endif
+                </div>
+                <p class="text-sm font-medium truncate">{{ $rec->name }}</p>
+                <p class="text-sm font-bold text-gray-800">Rp {{ number_format($rec->price, 0, ',', '.') }}</p>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </div>
 @endsection
