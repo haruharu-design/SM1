@@ -1,0 +1,210 @@
+NOTES RINGKAS PROJECT SM1 (Laravel)
+===================================
+
+Tujuan notes:
+- Menjelaskan struktur project secara singkat dan jelas.
+- Fokus: frontend, backend, database, dan isi controller.
+- Cocok untuk presentasi/skripsi level pemula.
+
+
+1) TEKNOLOGI YANG DIPAKAI
+-------------------------
+- Backend: Laravel (PHP) + Eloquent ORM.
+- Frontend: Blade template + Tailwind CSS + JS ringan (Vite).
+- Database: dikelola lewat migration + model Eloquent.
+- Admin panel: Filament (akses admin lewat /admin).
+
+
+2) PEMBAGIAN FRONTEND, BACKEND, DATABASE
+----------------------------------------
+A. Frontend (yang dilihat user)
+- Lokasi utama: resources/views/
+- Contoh halaman:
+  - products/index.blade.php (list produk)
+  - products/show.blade.php (detail produk)
+  - cart/index.blade.php (keranjang)
+  - checkout/show.blade.php (checkout)
+  - layouts/app.blade.php (layout utama)
+
+B. Backend (logika aplikasi)
+- Route: routes/web.php
+- Controller: app/Http/Controllers/
+- Service: app/Services/ (contoh CartService, ShippingService, RecommendationService)
+- Middleware/auth: mengatur login, proteksi route, session, CSRF, dll.
+
+C. Database (penyimpanan data)
+- Migration: database/migrations/
+- Model: app/Models/
+- Tabel inti: users, products, categories, orders, order_items, payments, reviews, wishlists.
+
+
+3) ALUR DATA SEDERHANA (REQUEST FLOW)
+-------------------------------------
+1. User buka URL (misal /products).
+2. Route di web.php cocokkan URL ke method controller.
+3. Controller validasi input, panggil model/service.
+4. Model ambil/simpan data ke database.
+5. Controller kirim data ke view Blade.
+6. Browser menampilkan hasil ke user.
+
+
+4) RINGKASAN ISI CONTROLLER
+---------------------------
+Catatan: semua controller ada di app/Http/Controllers.
+
+1. Controller.php
+- Base controller bawaan Laravel (parent class untuk controller lain).
+
+2. HomeController
+- Method index():
+  - Ambil produk aktif terbaru (maks 6).
+  - Ambil data wishlist user login.
+  - Ambil rekomendasi produk (RecommendationService).
+  - Return view home.
+
+3. AuthController
+- showLogin(): tampilkan form login.
+- login():
+  - Validasi email/password.
+  - Auth::attempt() untuk login.
+  - Cek akun suspended, jika suspended ditolak.
+  - Jika admin redirect ke /admin, jika user ke home.
+- showRegister(): tampilkan form register.
+- register():
+  - Validasi data register.
+  - Buat user baru (role default user).
+  - Auto login, redirect ke home.
+- logout():
+  - Logout, invalidate session, regenerate token.
+
+4. ProductController
+- index():
+  - Tampilkan list produk aktif.
+  - Search (nama/deskripsi), filter kategori, filter harga, sorting.
+  - Ambil kategori, wishlist user, dan rekomendasi.
+  - Return view products.index.
+- show():
+  - Ambil detail produk + relasi (kategori, review visible, Q&A yang sudah dijawab).
+  - Catat riwayat view produk (recordProductView).
+  - Cek apakah user sudah beli dan sudah review.
+  - Cek status wishlist.
+  - Ambil related products + personalized recommendations.
+  - Return view products.show.
+- recordProductView():
+  - Simpan jejak produk dilihat.
+  - Batasi duplikasi view (maks 1x per 5 menit per user/session per produk).
+
+5. AboutController
+- index(): tampilkan halaman about.
+
+6. ContactController
+- index(): tampilkan halaman contact.
+- store():
+  - Validasi input contact (name, email, message).
+  - Saat ini hanya kirim flash success (belum simpan DB/email).
+
+7. ProfileController
+- index(): tampilkan halaman profil user.
+- update():
+  - Update nama, email, dan password (opsional).
+  - Jika ganti password, wajib verifikasi current_password.
+
+8. ShippingController
+- calculate():
+  - Validasi address.
+  - Panggil ShippingService untuk hitung ongkir dari alamat.
+  - Return JSON hasil perhitungan.
+
+9. CartController
+- index(): tampilkan isi keranjang + subtotal.
+- add():
+  - Validasi product_id dan quantity.
+  - Tambah produk ke cart via CartService.
+  - Bisa return JSON atau redirect biasa.
+- update():
+  - Update quantity item cart (boleh 0 untuk hapus via update logic service).
+  - Bisa return JSON atau redirect.
+- remove():
+  - Hapus item dari cart.
+  - Bisa return JSON atau redirect.
+
+10. CheckoutController
+- show():
+  - Tampilkan checkout dari dua mode:
+    - Beli langsung (product_id + qty dari query).
+    - Dari keranjang.
+  - Jika cart kosong, redirect ke cart.
+- store():
+  - Validasi alamat, telepon, payment_method, dst.
+  - Ambil item (direct buy/cart).
+  - Hitung ongkir via ShippingService.
+  - DB transaction:
+    - Create order
+    - Create order_items
+    - Create payment
+  - COD dan transfer punya status payment/order berbeda.
+  - Clear cart jika checkout dari cart.
+  - Redirect ke detail order.
+
+11. OrderController
+- index(): tampilkan daftar order milik user login.
+- show():
+  - Tampilkan detail 1 order.
+  - Proteksi agar user hanya bisa lihat order miliknya.
+
+12. ReviewController
+- store():
+  - Validasi review.
+  - User hanya boleh review jika pernah beli produk terkait.
+  - User hanya boleh review 1 kali per produk.
+  - Simpan review dengan is_visible=false (menunggu moderasi admin).
+
+13. ProductQuestionController
+- store():
+  - Validasi pertanyaan produk.
+  - Simpan pertanyaan user.
+  - Menunggu jawaban admin.
+
+14. WishlistController
+- index(): tampilkan daftar wishlist user.
+- toggle():
+  - Jika produk sudah ada di wishlist -> hapus.
+  - Jika belum ada -> tambah.
+  - Bisa return JSON atau redirect.
+- remove():
+  - Hapus item wishlist tertentu.
+
+15. TodanaController
+- index(): tampilkan halaman todana.index (halaman tambahan/static).
+
+
+5) RINGKASAN ROUTE
+------------------
+- routes/web.php dipakai aktif untuk semua fitur web:
+  - Public: home, about, products, contact
+  - Auth: login/register/logout
+  - Protected (auth): profile, cart, checkout, orders, review, Q&A, wishlist
+  - Endpoint JSON: POST /shipping/calculate
+- routes/api.php saat ini belum dipakai aktif (masih template default).
+
+
+6) RINGKASAN DATABASE (FUNGSI TABEL)
+------------------------------------
+- users: akun user/admin + role + status akun.
+- products: data produk (nama, harga, stok, aktif/tidak, kategori).
+- categories: kategori produk.
+- orders: data pesanan utama (subtotal, total, status, alamat kirim).
+- order_items: detail item produk per pesanan.
+- payments: data metode/status pembayaran.
+- reviews: ulasan dan rating produk.
+- wishlists: daftar favorit per user.
+- product_questions: pertanyaan user untuk produk.
+- product_views: jejak produk yang pernah dilihat (untuk rekomendasi).
+
+
+7) KESIMPULAN SINGKAT
+---------------------
+- Arsitektur project sudah jelas: route -> controller -> model/service -> view.
+- Fitur utama e-commerce sudah lengkap: katalog, cart, checkout, order, wishlist, review.
+- Ada pemisahan logic yang bagus ke service (cart, shipping, recommendation).
+- Siap dijelaskan untuk skripsi sebagai aplikasi web e-commerce berbasis Laravel.
