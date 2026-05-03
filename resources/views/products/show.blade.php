@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $product->name . ' - Todana')
+@section('title', $product->name . ' - SM')
 
 @section('content')
 

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Signup - Todana')
+@section('title', 'Signup - SM')
 
 @section('content')
 <!-- Container utama -->

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Wishlist - Todana')
+@section('title', 'Wishlist - SM')
 
 @section('content')
 <div class="max-w-7xl mx-auto bg-gradient-to-br from-red-500/10 to-blue-500/10 rounded-2xl p-6">

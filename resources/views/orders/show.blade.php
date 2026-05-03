@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Pesanan - Todana')
+@section('title', 'Detail Pesanan - SM')
 
 @section('content')
 <div class="max-w-4xl mx-auto bg-gradient-to-br from-red-500/10 to-blue-500/10 rounded-2xl p-6">

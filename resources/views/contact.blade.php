@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Contact - Todana')
+@section('title', 'Contact - SM')
 
 @section('content')
 
@@ -32,9 +32,32 @@
                 <strong>Telepon:</strong> +62-815-2844-2245
             </p>
             <p class="text-gray-700">
-                <strong>Alamat:</strong> Jl. Putri Candramidi, deretan Masjid Mujahidin, Kota Baru Pontianak
+                <strong>Alamat:</strong> Jl. Putri Candramidi, Toko Sinar Mentari, deretan Masjid Mujahidin, Kota Baru Pontianak
             </p>
         </div>
+
+        <!-- TAMBAHAN MAP (tidak mengubah yang lain) -->
+        <div class="bg-white/80 backdrop-blur-sm 
+                    border border-gray-200 
+                    rounded-xl shadow-lg p-6 mb-6">
+
+            <h5 class="text-xl font-bold mb-4">
+                Lokasi Kami
+            </h5>
+
+            <div class="w-full h-[300px] rounded-lg overflow-hidden">
+                <iframe
+                    src= "https://www.google.com/maps?output=embed&q=-0.0372897,109.3261568&z=18"
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy">
+                </iframe>
+            </div>
+
+        </div>
+        <!-- END TAMBAHAN -->
 
         <!-- Card form pesan -->
         <div class="bg-white/80 backdrop-blur-sm 
