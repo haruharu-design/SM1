@@ -27,7 +27,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('Todana Admin')
+            ->brandName('SM Admin')
             ->darkMode(false)
             ->colors([
                 'primary' => Color::Indigo,
