@@ -1,19 +1,20 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AboutController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ShippingController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductQuestionController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ShippingController;
 use App\Http\Controllers\WishlistController;
+use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -51,6 +52,10 @@ Route::middleware('auth')->group(function () {
     // Orders (riwayat pesanan)
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 
     // Review & Rating
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');

@@ -17,11 +17,6 @@ class ProcessOrderAfterPaymentConfirmed implements ShouldQueue
         public Order $order
     ) {}
 
-    /**
-     * Delay beberapa detik untuk simulasi otomatisasi.
-     */
-    public $delay = 5;
-
     public function handle(): void
     {
         $this->order->update([

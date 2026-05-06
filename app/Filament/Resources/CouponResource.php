@@ -6,6 +6,7 @@ use App\Filament\Resources\CouponResource\Pages;
 use App\Models\Coupon;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -15,7 +16,9 @@ class CouponResource extends Resource
     protected static ?string $model = Coupon::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
+
     protected static ?string $navigationGroup = 'Manajemen';
+
     protected static ?string $modelLabel = 'Kupon';
 
     public static function form(Form $form): Form
@@ -26,7 +29,16 @@ class CouponResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true)
-                    ->uppercase(),
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function (?string $state, Set $set): void {
+                        if (filled($state)) {
+                            $upper = strtoupper($state);
+                            if ($upper !== $state) {
+                                $set('code', $upper);
+                            }
+                        }
+                    })
+                    ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? strtoupper($state) : $state),
                 Forms\Components\Select::make('type')
                     ->options(['percentage' => 'Persen', 'fixed' => 'Nominal'])
                     ->required(),
@@ -65,8 +77,8 @@ class CouponResource extends Resource
                     ->formatStateUsing(fn ($state) => $state === 'percentage' ? 'Persen' : 'Nominal'),
                 Tables\Columns\TextColumn::make('value')
                     ->formatStateUsing(fn ($record) => $record->type === 'percentage'
-                        ? $record->value . '%'
-                        : 'Rp ' . number_format($record->value, 0, ',', '.')),
+                        ? $record->value.'%'
+                        : 'Rp '.number_format($record->value, 0, ',', '.')),
                 Tables\Columns\TextColumn::make('used_count')
                     ->suffix(fn ($record) => $record->max_usage ? " / {$record->max_usage}" : ''),
                 Tables\Columns\TextColumn::make('valid_until')

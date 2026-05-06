@@ -9,6 +9,11 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50">
+    @auth
+        @php
+            $navUnreadCount = auth()->user()->unreadNotifications()->count();
+        @endphp
+    @endauth
 
     <!-- Navigation bar -->
     <nav class="bg-gradient-to-r from-red-500/80 to-blue-500/80 backdrop-blur shadow">
@@ -45,6 +50,12 @@
                 <!-- Menu kanan -->
                 <div class="hidden md:flex items-center space-x-4 text-white">
                     @auth
+                        <a href="{{ route('notifications.index') }}" class="text-sm hover:underline inline-flex items-center gap-1">
+                            Notifikasi
+                            @if($navUnreadCount > 0)
+                                <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold rounded-full bg-white text-red-600">{{ $navUnreadCount > 99 ? '99+' : $navUnreadCount }}</span>
+                            @endif
+                        </a>
                         <a href="{{ route('cart.index') }}" class="text-sm hover:underline">Keranjang</a>
                         <a href="{{ route('wishlist.index') }}" class="text-sm hover:underline">Wishlist</a>
                         <a href="{{ route('orders.index') }}" class="text-sm hover:underline">Pesanan</a>
@@ -86,6 +97,12 @@
                 <a href="{{ route('contact') }}" class="block px-3 py-2">Contact</a>
 
                 @auth
+                    <a href="{{ route('notifications.index') }}" class="block px-3 py-2 inline-flex items-center gap-2">
+                        Notifikasi
+                        @if($navUnreadCount > 0)
+                            <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold rounded-full bg-white text-red-600">{{ $navUnreadCount > 99 ? '99+' : $navUnreadCount }}</span>
+                        @endif
+                    </a>
                     <a href="{{ route('cart.index') }}" class="block px-3 py-2">Keranjang</a>
                     <a href="{{ route('wishlist.index') }}" class="block px-3 py-2">Wishlist</a>
                     <a href="{{ route('orders.index') }}" class="block px-3 py-2">Pesanan</a>

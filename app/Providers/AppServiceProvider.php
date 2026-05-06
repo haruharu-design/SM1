@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\Order;
+use App\Observers\OrderObserver;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->extend('migration.repository', function ($repository, $app) {
             $migrationsConfig = $app['config']['database.migrations'];
             $table = is_array($migrationsConfig) ? ($migrationsConfig['table'] ?? 'migrations') : $migrationsConfig;
-            
+
             return new DatabaseMigrationRepository($app['db'], $table);
         });
     }
@@ -27,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Paginator::useTailwind();
+        Order::observe(OrderObserver::class);
     }
 }
