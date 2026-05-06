@@ -7,6 +7,7 @@ use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -16,7 +17,9 @@ class OrderResource extends Resource
     protected static ?string $model = Order::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+
     protected static ?string $navigationGroup = 'Manajemen';
+
     protected static ?string $modelLabel = 'Order';
 
     public static function form(Form $form): Form
@@ -92,6 +95,29 @@ class OrderResource extends Resource
                     ->options(Order::statusOptions()),
             ])
             ->actions([
+                Tables\Actions\Action::make('confirmPayment')
+                    ->label('Konfirmasi bayar')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Konfirmasi pembayaran transfer?')
+                    ->modalDescription('Sama seperti tombol di halaman pembayaran: status pembayaran jadi terkonfirmasi dan pesanan diproses.')
+                    ->visible(fn (Order $record): bool => $record->awaitsAdminBankTransferConfirmation())
+                    ->action(function (Order $record): void {
+                        $payment = $record->getAwaitingBankTransferPayment();
+                        if (! $payment) {
+                            Notification::make()->title('Gagal')->body('Tidak ada pembayaran yang menunggu konfirmasi.')->danger()->send();
+
+                            return;
+                        }
+
+                        try {
+                            $payment->confirmFromAdmin();
+                            Notification::make()->title('Pembayaran dikonfirmasi')->success()->send();
+                        } catch (\Throwable $e) {
+                            Notification::make()->title('Gagal')->body($e->getMessage())->danger()->send();
+                        }
+                    }),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentResource\Pages;
-use App\Jobs\ProcessOrderAfterPaymentConfirmed;
 use App\Models\Payment;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -14,8 +13,11 @@ class PaymentResource extends Resource
     protected static ?string $model = Payment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+
     protected static ?string $navigationGroup = 'Manajemen';
+
     protected static ?string $modelLabel = 'Pembayaran';
+
     protected static ?string $pluralModelLabel = 'Monitoring Transaksi';
 
     public static function table(Table $table): Table
@@ -63,13 +65,7 @@ class PaymentResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->action(function (Payment $record) {
-                        $record->update([
-                            'status' => Payment::STATUS_CONFIRMED,
-                            'paid_at' => now(),
-                        ]);
-                        ProcessOrderAfterPaymentConfirmed::dispatch($record->order)->delay(now()->addSeconds(5));
-                    })
+                    ->action(fn (Payment $record) => $record->confirmFromAdmin())
                     ->visible(fn (Payment $record) => $record->status === Payment::STATUS_AWAITING_CONFIRMATION),
             ])
             ->defaultSort('created_at', 'desc');

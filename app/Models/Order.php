@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
@@ -43,16 +43,24 @@ class Order extends Model
 
     /** Status pesanan */
     public const STATUS_WAITING_PAYMENT = 'menunggu_pembayaran';
+
     public const STATUS_PROCESSING = 'diproses';
+
     public const STATUS_SHIPPED = 'dikirim';
+
     public const STATUS_COMPLETED = 'selesai';
+
     public const STATUS_CANCELLED = 'dibatalkan';
 
     /** Legacy aliases untuk kompatibilitas */
     public const STATUS_PENDING = self::STATUS_WAITING_PAYMENT;
+
     public const STATUS_CONFIRMED = self::STATUS_PROCESSING;
+
     public const STATUS_PICKED_UP = self::STATUS_SHIPPED;
+
     public const STATUS_ON_DELIVERY = self::STATUS_SHIPPED;
+
     public const STATUS_DELIVERED = self::STATUS_COMPLETED;
 
     public static function statusOptions(): array
@@ -86,6 +94,25 @@ class Order extends Model
         $prefix = 'ORD';
         $date = now()->format('Ymd');
         $last = static::whereDate('created_at', today())->count() + 1;
-        return $prefix . $date . str_pad((string) $last, 4, '0', STR_PAD_LEFT);
+
+        return $prefix.$date.str_pad((string) $last, 4, '0', STR_PAD_LEFT);
+    }
+
+    /** Order transfer bank menunggu admin konfirmasi pembayaran */
+    public function awaitsAdminBankTransferConfirmation(): bool
+    {
+        return $this->status === self::STATUS_WAITING_PAYMENT
+            && $this->payments()
+                ->where('status', Payment::STATUS_AWAITING_CONFIRMATION)
+                ->where('method', Payment::METHOD_BANK_TRANSFER)
+                ->exists();
+    }
+
+    public function getAwaitingBankTransferPayment(): ?Payment
+    {
+        return $this->payments()
+            ->where('status', Payment::STATUS_AWAITING_CONFIRMATION)
+            ->where('method', Payment::METHOD_BANK_TRANSFER)
+            ->first();
     }
 }
