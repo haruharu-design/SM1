@@ -64,6 +64,15 @@ class OrderResource extends Resource
                     ->label('Customer')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('discount')
+                    ->label('Voucher (Rp)')
+                    ->money('IDR')
+                    ->placeholder('—')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('coupon_code')
+                    ->label('Kode voucher')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('total')
                     ->money('IDR')
                     ->sortable(),

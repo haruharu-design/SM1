@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CouponResource\Pages;
 use App\Models\Coupon;
+use App\Services\CheckoutPromotionService;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
@@ -39,6 +41,8 @@ class CouponResource extends Resource
                         }
                     })
                     ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? strtoupper($state) : $state),
+                Hidden::make('kind')
+                    ->default(CheckoutPromotionService::KIND_VOUCHER),
                 Forms\Components\Select::make('type')
                     ->options(['percentage' => 'Persen', 'fixed' => 'Nominal'])
                     ->required(),

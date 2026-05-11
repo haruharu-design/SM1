@@ -22,6 +22,7 @@ class Order extends Model
         'shipping_phone',
         'tracking_number',
         'coupon_code',
+        'discount_code',
         'distance_km',
         'shipping_cost',
         'shipping_lat',
@@ -114,5 +115,15 @@ class Order extends Model
             ->where('status', Payment::STATUS_AWAITING_CONFIRMATION)
             ->where('method', Payment::METHOD_BANK_TRANSFER)
             ->first();
+    }
+
+    /** Total penghematan dari diskon persen per produk (bukan voucher). */
+    public function productDiscountSaved(): float
+    {
+        return round((float) $this->items->sum(function (OrderItem $item): float {
+            $list = $item->list_unit_price !== null ? (float) $item->list_unit_price : (float) $item->unit_price;
+
+            return max(0.0, $list * (int) $item->quantity - (float) $item->total_price);
+        }), 2);
     }
 }

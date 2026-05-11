@@ -31,17 +31,37 @@
         <h2 class="font-bold mb-4">Detail Produk</h2>
         <div class="space-y-3">
             @foreach($order->items as $item)
-            <div class="flex justify-between border-b pb-2">
-                <span>{{ $item->product->name }} × {{ $item->quantity }}</span>
-                <span>Rp {{ number_format($item->total_price, 0, ',', '.') }}</span>
+            @php
+                $listUnit = $item->list_unit_price ?? $item->unit_price;
+                $hadItemDiscount = $item->list_unit_price !== null && (float) $item->list_unit_price > (float) $item->unit_price;
+            @endphp
+            <div class="flex justify-between border-b pb-2 gap-4">
+                <div>
+                    <span>{{ $item->product->name }} × {{ $item->quantity }}</span>
+                    @if($hadItemDiscount)
+                        <p class="text-xs text-gray-500 mt-0.5">Harga katalog Rp {{ number_format((float) $listUnit, 0, ',', '.') }} / unit</p>
+                    @endif
+                </div>
+                <span class="shrink-0">Rp {{ number_format($item->total_price, 0, ',', '.') }}</span>
             </div>
             @endforeach
         </div>
         <div class="mt-4 pt-4 border-t space-y-1">
             <div class="flex justify-between">
-                <span>Subtotal</span>
+                <span>Subtotal barang @if($order->productDiscountSaved() > 0)<span class="text-xs font-normal text-gray-500">(setelah diskon per produk)</span>@endif</span>
                 <span>Rp {{ number_format($order->subtotal, 0, ',', '.') }}</span>
             </div>
+            @if($order->discount > 0)
+            <div class="flex justify-between text-green-700">
+                <span>
+                    Voucher
+                    @if($order->coupon_code)
+                        <span class="block text-xs font-normal text-gray-600">{{ $order->coupon_code }}</span>
+                    @endif
+                </span>
+                <span>− Rp {{ number_format($order->discount, 0, ',', '.') }}</span>
+            </div>
+            @endif
             @if($order->shipping_cost)
             <div class="flex justify-between">
                 <span>Ongkir {{ $order->distance_km ? '(' . $order->distance_km . ' km)' : '(estimasi)' }}</span>

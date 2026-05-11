@@ -17,6 +17,7 @@ class Product extends Model
         'slug',
         'description',
         'price',
+        'discount_percent',
         'stock',
         'image',
         'category_id',
@@ -27,8 +28,34 @@ class Product extends Model
     {
         return [
             'price' => 'decimal:2',
+            'discount_percent' => 'decimal:2',
             'is_active' => 'boolean',
         ];
+    }
+
+    /** Harga katalog (sebelum diskon per item). */
+    public function listUnitPrice(): float
+    {
+        return round((float) $this->price, 2);
+    }
+
+    /** Harga jual per unit setelah diskon persen per produk (bukan voucher). */
+    public function sellingUnitPrice(): float
+    {
+        $list = $this->listUnitPrice();
+        $d = $this->discount_percent;
+        if ($d === null || (float) $d <= 0) {
+            return $list;
+        }
+
+        $pct = min(100.0, max(0.0, (float) $d));
+
+        return round($list * (1 - $pct / 100), 2);
+    }
+
+    public function hasItemDiscount(): bool
+    {
+        return $this->discount_percent !== null && (float) $this->discount_percent > 0;
     }
 
     public function orderItems(): HasMany

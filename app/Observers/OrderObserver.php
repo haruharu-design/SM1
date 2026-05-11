@@ -9,7 +9,7 @@ class OrderObserver
 {
     public function created(Order $order): void
     {
-        $this->notifyStatusChange($order, null, $order->status);
+        $this->notifyUser($order, null, $order->status, true);
     }
 
     public function updated(Order $order): void
@@ -18,22 +18,45 @@ class OrderObserver
             return;
         }
 
-        $this->notifyStatusChange($order, $order->getOriginal('status'), $order->status);
+        $this->notifyUser($order, $order->getOriginal('status'), $order->status, false);
     }
 
-    protected function notifyStatusChange(Order $order, ?string $oldStatus, string $newStatus): void
+    protected function notifyUser(Order $order, ?string $oldStatus, string $newStatus, bool $isCreate): void
     {
         $user = $order->user;
         if (! $user) {
             return;
         }
 
-        if ($newStatus === Order::STATUS_PROCESSING && $oldStatus !== Order::STATUS_PROCESSING) {
-            $user->notify(new OrderStatusNotification($order, 'processing'));
+        $event = $this->resolveNotificationEvent($isCreate, $oldStatus, $newStatus);
+        if ($event === null) {
+            return;
         }
 
-        if ($newStatus === Order::STATUS_COMPLETED && $oldStatus !== Order::STATUS_COMPLETED) {
-            $user->notify(new OrderStatusNotification($order, 'completed'));
+        $user->notify(new OrderStatusNotification($order, $event));
+    }
+
+    protected function resolveNotificationEvent(bool $isCreate, ?string $oldStatus, string $newStatus): ?string
+    {
+        if ($isCreate) {
+            return match ($newStatus) {
+                Order::STATUS_WAITING_PAYMENT => 'awaiting_payment',
+                Order::STATUS_PROCESSING => 'processing',
+                default => 'order_received',
+            };
         }
+
+        if ($oldStatus === $newStatus) {
+            return null;
+        }
+
+        return match ($newStatus) {
+            Order::STATUS_WAITING_PAYMENT => 'awaiting_payment',
+            Order::STATUS_PROCESSING => 'processing',
+            Order::STATUS_SHIPPED => 'shipped',
+            Order::STATUS_COMPLETED => 'completed',
+            Order::STATUS_CANCELLED => 'cancelled',
+            default => null,
+        };
     }
 }

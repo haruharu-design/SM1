@@ -106,7 +106,7 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-sm font-medium text-gray-900 truncate">{{ $rec->name }}</p>
-                            <p class="text-sm font-bold text-gray-700">Rp {{ number_format($rec->price, 0, ',', '.') }}</p>
+                            <p class="text-sm font-bold text-gray-700">Rp {{ number_format($rec->sellingUnitPrice(), 0, ',', '.') }}</p>
                         </div>
                     </a>
                     @endforeach
@@ -175,9 +175,7 @@
                         {{ Str::limit($product->description, 80) ?: 'Deskripsi produk' }}
                     </p>
 
-                    <p class="text-gray-900 font-bold mb-4">
-                        Rp {{ number_format($product->price, 0, ',', '.') }}
-                    </p>
+                    <div class="mb-4"><x-product-price :product="$product" /></div>
 
                     <div class="flex gap-2 flex-wrap">
                         <a href="{{ route('products.show', $product->id) }}"

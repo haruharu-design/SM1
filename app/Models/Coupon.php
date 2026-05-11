@@ -12,6 +12,7 @@ class Coupon extends Model
 
     protected $fillable = [
         'code',
+        'kind',
         'type',
         'value',
         'min_purchase',

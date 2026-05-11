@@ -19,10 +19,11 @@ class CartService
         foreach ($cart as $productId => $quantity) {
             $product = Product::where('is_active', true)->find($productId);
             if ($product) {
+                $qty = (int) $quantity;
                 $items[] = [
                     'product' => $product,
-                    'quantity' => (int) $quantity,
-                    'subtotal' => $product->price * (int) $quantity,
+                    'quantity' => $qty,
+                    'subtotal' => $product->sellingUnitPrice() * $qty,
                 ];
             }
         }

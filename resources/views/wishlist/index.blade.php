@@ -30,7 +30,7 @@
                     <div class="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 mb-3">No image</div>
                 @endif
                 <h3 class="font-bold text-gray-900">{{ $wishlist->product->name }}</h3>
-                <p class="text-gray-700 font-bold">Rp {{ number_format($wishlist->product->price, 0, ',', '.') }}</p>
+                <p class="text-gray-700 font-bold">Rp {{ number_format($wishlist->product->sellingUnitPrice(), 0, ',', '.') }}</p>
                 <a href="{{ route('products.show', $wishlist->product_id) }}" class="inline-block mt-2 text-blue-600 hover:underline text-sm">Lihat Detail</a>
             </div>
             @endforeach

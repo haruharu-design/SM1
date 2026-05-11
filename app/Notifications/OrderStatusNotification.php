@@ -4,7 +4,9 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
 
 class OrderStatusNotification extends Notification
 {
@@ -12,25 +14,85 @@ class OrderStatusNotification extends Notification
 
     public function __construct(
         public Order $order,
-        public string $kind
+        public string $event
     ) {}
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        $channels = ['database'];
+
+        if (config('order_notifications.mail_enabled') && filled($notifiable->email ?? null)) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     public function toDatabase(object $notifiable): array
     {
-        return match ($this->kind) {
+        return $this->payloadForChannels();
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $payload = $this->payloadForChannels();
+        $orderUrl = URL::route('orders.show', $this->order, true);
+
+        $message = (new MailMessage)
+            ->subject($payload['title'].' — '.$this->order->order_number)
+            ->greeting('Halo, '.$notifiable->name.'.')
+            ->line($payload['body'])
+            ->action('Lihat detail pesanan', $orderUrl)
+            ->line('Terima kasih telah berbelanja di '.config('app.name').'.');
+
+        if (config('order_notifications.bcc_admin') && filled(config('order_notifications.admin_address'))) {
+            $message->bcc((string) config('order_notifications.admin_address'));
+        }
+
+        return $message;
+    }
+
+    /**
+     * @return array{title: string, body: string, order_id: int}
+     */
+    protected function payloadForChannels(): array
+    {
+        $no = $this->order->order_number;
+
+        return match ($this->event) {
+            'awaiting_payment' => [
+                'title' => 'Menunggu pembayaran',
+                'body' => 'Pesanan '.$no.' telah dibuat. Silakan selesaikan pembayaran transfer sesuai instruksi di halaman detail pesanan.',
+                'order_id' => $this->order->id,
+            ],
             'processing' => [
-                'title' => 'Pesanan sedang diproses',
-                'body' => 'Pesanan '.$this->order->order_number.' sedang diproses oleh tim kami.',
+                'title' => 'Pesanan diproses',
+                'body' => 'Pesanan '.$no.' sedang diproses oleh tim kami.',
+                'order_id' => $this->order->id,
+            ],
+            'shipped' => [
+                'title' => 'Pesanan dikirim',
+                'body' => 'Pesanan '.$no.' sedang dalam pengiriman.'.($this->order->tracking_number ? ' No. resi: '.$this->order->tracking_number.'.' : ''),
                 'order_id' => $this->order->id,
             ],
             'completed' => [
                 'title' => 'Pesanan selesai',
-                'body' => 'Pesanan '.$this->order->order_number.' telah selesai. Silakan berikan ulasan untuk produk yang Anda beli.',
+                'body' => 'Pesanan '.$no.' telah selesai. Silakan berikan ulasan untuk produk yang Anda beli.',
+                'order_id' => $this->order->id,
+            ],
+            'cancelled' => [
+                'title' => 'Pesanan dibatalkan',
+                'body' => 'Pesanan '.$no.' telah dibatalkan.',
+                'order_id' => $this->order->id,
+            ],
+            'order_received' => [
+                'title' => 'Pesanan diterima',
+                'body' => 'Kami telah mencatat pesanan '.$no.'.',
+                'order_id' => $this->order->id,
+            ],
+            default => [
+                'title' => 'Update pesanan',
+                'body' => 'Ada pembaruan untuk pesanan '.$no.'.',
                 'order_id' => $this->order->id,
             ],
         };

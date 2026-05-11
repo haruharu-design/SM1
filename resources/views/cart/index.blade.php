@@ -40,7 +40,12 @@
                                 <span class="font-medium">{{ $item['product']->name }}</span>
                             </div>
                         </td>
-                        <td class="px-4 py-4">Rp {{ number_format($item['product']->price, 0, ',', '.') }}</td>
+                        <td class="px-4 py-4">
+                            @if($item['product']->hasItemDiscount())
+                                <span class="line-through text-gray-400 text-sm block">Rp {{ number_format($item['product']->listUnitPrice(), 0, ',', '.') }}</span>
+                            @endif
+                            Rp {{ number_format($item['product']->sellingUnitPrice(), 0, ',', '.') }} <span class="text-gray-500 text-xs">/ unit</span>
+                        </td>
                         <td class="px-4 py-4">
                             <form action="{{ route('cart.update') }}" method="POST" class="inline-flex items-center gap-2">
                                 @csrf

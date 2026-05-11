@@ -62,9 +62,9 @@
             </p>
             @endif
 
-            <h3 class="text-2xl font-bold mb-6 text-gray-900">
-                Rp {{ number_format($product->price, 0, ',', '.') }}
-            </h3>
+            <div class="mb-6">
+                <x-product-price :product="$product" class="text-2xl" />
+            </div>
 
             <div class="mb-6">
                 <h4 class="text-xl font-bold mb-2 text-gray-700">
@@ -208,7 +208,7 @@
                     @endif
                 </div>
                 <p class="text-sm font-medium truncate">{{ $rel->name }}</p>
-                <p class="text-sm font-bold text-gray-800">Rp {{ number_format($rel->price, 0, ',', '.') }}</p>
+                <p class="text-sm font-bold text-gray-800">Rp {{ number_format($rel->sellingUnitPrice(), 0, ',', '.') }}</p>
             </a>
             @endforeach
         </div>
@@ -231,7 +231,7 @@
                     @endif
                 </div>
                 <p class="text-sm font-medium truncate">{{ $rec->name }}</p>
-                <p class="text-sm font-bold text-gray-800">Rp {{ number_format($rec->price, 0, ',', '.') }}</p>
+                <p class="text-sm font-bold text-gray-800">Rp {{ number_format($rec->sellingUnitPrice(), 0, ',', '.') }}</p>
             </a>
             @endforeach
         </div>

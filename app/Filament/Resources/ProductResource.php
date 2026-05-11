@@ -40,7 +40,16 @@ class ProductResource extends Resource
                     ->required()
                     ->numeric()
                     ->prefix('Rp')
-                    ->minValue(0),
+                    ->minValue(0)
+                    ->label('Harga katalog'),
+                Forms\Components\TextInput::make('discount_percent')
+                    ->label('Diskon produk (%)')
+                    ->numeric()
+                    ->minValue(0)
+                    ->maxValue(100)
+                    ->suffix('%')
+                    ->placeholder('0 atau kosong = tanpa diskon')
+                    ->helperText('Potongan per item, bukan kode voucher. Harga jual = harga katalog dikurangi persen ini.'),
                 Forms\Components\TextInput::make('stock')
                     ->required()
                     ->numeric()
@@ -73,7 +82,12 @@ class ProductResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')
+                    ->label('Harga katalog')
                     ->money('IDR')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('discount_percent')
+                    ->label('Diskon %')
+                    ->formatStateUsing(fn ($state) => $state !== null && (float) $state > 0 ? $state.'%' : '—')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('stock')
                     ->sortable(),

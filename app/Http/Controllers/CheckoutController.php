@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Services\CartService;
+use App\Services\CheckoutPromotionService;
 use App\Services\ShippingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,8 @@ class CheckoutController extends Controller
 {
     public function __construct(
         protected CartService $cart,
-        protected ShippingService $shipping
+        protected ShippingService $shipping,
+        protected CheckoutPromotionService $promotions
     ) {}
 
     /**
@@ -32,12 +34,13 @@ class CheckoutController extends Controller
             // Beli Langsung: 1 produk, qty dari param (default 1)
             $product = Product::where('is_active', true)->findOrFail($request->product_id);
             $qty = max(1, (int) $request->get('quantity', 1));
+            $line = $product->sellingUnitPrice() * $qty;
             $items = [[
                 'product' => $product,
                 'quantity' => $qty,
-                'subtotal' => $product->price * $qty,
+                'subtotal' => $line,
             ]];
-            $subtotal = $product->price * $qty;
+            $subtotal = $line;
             $isDirectBuy = true;
         } else {
             // Dari Keranjang
@@ -66,6 +69,7 @@ class CheckoutController extends Controller
             'bank_id' => 'required_if:payment_method,bank_transfer|nullable|string',
             'product_id' => 'nullable|exists:products,id',
             'quantity' => 'nullable|integer|min:1',
+            'voucher_code' => 'nullable|string|max:64',
         ]);
 
         $items = [];
@@ -75,12 +79,13 @@ class CheckoutController extends Controller
             // Beli Langsung
             $product = Product::where('is_active', true)->findOrFail($request->product_id);
             $qty = max(1, (int) $request->quantity);
+            $line = $product->sellingUnitPrice() * $qty;
             $items = [[
                 'product' => $product,
                 'quantity' => $qty,
-                'subtotal' => $product->price * $qty,
+                'subtotal' => $line,
             ]];
-            $subtotal = $product->price * $qty;
+            $subtotal = $line;
         } else {
             // Dari Keranjang
             $items = $this->cart->getItems();
@@ -102,22 +107,38 @@ class CheckoutController extends Controller
 
         $shippingCost = $shippingResult['shipping_cost'];
         $distanceKm = $shippingResult['distance_km'];
-        $total = $subtotal + $shippingCost;
 
         $paymentMethod = $request->payment_method;
         $isCod = $paymentMethod === Payment::METHOD_COD;
 
         DB::beginTransaction();
         try {
+            $promo = $this->promotions->applyVoucher($subtotal, $request->input('voucher_code'));
+
+            if (! $promo['success']) {
+                DB::rollBack();
+
+                return back()
+                    ->withInput()
+                    ->with('error', $promo['message'] ?? 'Kode voucher tidak valid.');
+            }
+
+            $totalOff = $promo['total_off'];
+            $total = round($subtotal - $totalOff + $shippingCost, 2);
+
+            $orderInitialStatus = $isCod ? Order::STATUS_PROCESSING : Order::STATUS_WAITING_PAYMENT;
+
             $order = Order::create([
                 'user_id' => auth()->id(),
                 'order_number' => Order::generateOrderNumber(),
                 'subtotal' => $subtotal,
-                'discount' => 0,
+                'discount' => $totalOff,
                 'total' => $total,
-                'status' => Order::STATUS_WAITING_PAYMENT,
+                'status' => $orderInitialStatus,
                 'shipping_address' => $request->shipping_address,
                 'shipping_phone' => $request->shipping_phone,
+                'coupon_code' => $promo['voucher_code'],
+                'discount_code' => null,
                 'distance_km' => $distanceKm,
                 'shipping_cost' => $shippingCost,
                 'shipping_lat' => $shippingResult['shipping_lat'] ?? null,
@@ -125,21 +146,18 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($items as $item) {
+                $p = $item['product'];
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $item['product']->id,
+                    'product_id' => $p->id,
                     'quantity' => $item['quantity'],
-                    'unit_price' => $item['product']->price,
+                    'list_unit_price' => $p->listUnitPrice(),
+                    'unit_price' => $p->sellingUnitPrice(),
                     'total_price' => $item['subtotal'],
                 ]);
             }
 
             $paymentStatus = $isCod ? Payment::STATUS_PENDING : Payment::STATUS_AWAITING_CONFIRMATION;
-            $orderStatus = $isCod ? Order::STATUS_PROCESSING : Order::STATUS_WAITING_PAYMENT;
-
-            if ($isCod) {
-                $order->update(['status' => $orderStatus]);
-            }
 
             Payment::create([
                 'order_id' => $order->id,
@@ -152,6 +170,8 @@ class CheckoutController extends Controller
             if (empty($request->product_id)) {
                 $this->cart->clear();
             }
+
+            $this->promotions->incrementCouponUsage($promo['coupons_to_increment']);
 
             DB::commit();
 

@@ -103,7 +103,7 @@
                     @endif
                 </div>
                 <h5 class="text-lg font-semibold mb-2 text-gray-900">{{ $product->name }}</h5>
-                <p class="text-gray-900 font-bold mb-4">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                <div class="mb-4"><x-product-price :product="$product" /></div>
                 <div class="flex gap-2">
                     <a href="{{ route('products.show', $product->id) }}" class="inline-block bg-gradient-to-r from-red-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm">Lihat Detail</a>
                     @auth
@@ -161,9 +161,7 @@
                 {{ Str::limit($product->description, 60) ?: 'Deskripsi produk' }}
             </p>
 
-            <p class="text-gray-900 font-bold mb-4">
-                Rp {{ number_format($product->price, 0, ',', '.') }}
-            </p>
+            <div class="mb-4"><x-product-price :product="$product" /></div>
 
             <div class="flex gap-2 flex-wrap">
                 <a href="{{ route('products.show', $product->id) }}"
