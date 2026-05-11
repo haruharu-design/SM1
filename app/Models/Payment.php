@@ -56,6 +56,11 @@ class Payment extends Model
         return $this->belongsTo(Order::class);
     }
 
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(BankAccount::class, 'bank_id', 'code');
+    }
+
     public function isConfirmed(): bool
     {
         return $this->status === self::STATUS_CONFIRMED;

@@ -6,8 +6,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\BankAccount;
 use App\Services\CartService;
-use App\Services\CheckoutPromotionService;
 use App\Services\ShippingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,8 +16,7 @@ class CheckoutController extends Controller
 {
     public function __construct(
         protected CartService $cart,
-        protected ShippingService $shipping,
-        protected CheckoutPromotionService $promotions
+        protected ShippingService $shipping
     ) {}
 
     /**
@@ -53,7 +52,11 @@ class CheckoutController extends Controller
             }
         }
 
-        $banks = config('banks.accounts', []);
+        $banks = BankAccount::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['code', 'name', 'account_number', 'account_name']);
         return view('checkout.show', compact('items', 'subtotal', 'isDirectBuy', 'banks'));
     }
 
@@ -66,10 +69,9 @@ class CheckoutController extends Controller
             'shipping_address' => 'required|string|max:500',
             'shipping_phone' => 'required|string|max:20',
             'payment_method' => 'required|in:cod,bank_transfer',
-            'bank_id' => 'required_if:payment_method,bank_transfer|nullable|string',
+            'bank_id' => 'required_if:payment_method,bank_transfer|nullable|exists:bank_accounts,code',
             'product_id' => 'nullable|exists:products,id',
             'quantity' => 'nullable|integer|min:1',
-            'voucher_code' => 'nullable|string|max:64',
         ]);
 
         $items = [];
@@ -113,18 +115,7 @@ class CheckoutController extends Controller
 
         DB::beginTransaction();
         try {
-            $promo = $this->promotions->applyVoucher($subtotal, $request->input('voucher_code'));
-
-            if (! $promo['success']) {
-                DB::rollBack();
-
-                return back()
-                    ->withInput()
-                    ->with('error', $promo['message'] ?? 'Kode voucher tidak valid.');
-            }
-
-            $totalOff = $promo['total_off'];
-            $total = round($subtotal - $totalOff + $shippingCost, 2);
+            $total = round($subtotal + $shippingCost, 2);
 
             $orderInitialStatus = $isCod ? Order::STATUS_PROCESSING : Order::STATUS_WAITING_PAYMENT;
 
@@ -132,13 +123,11 @@ class CheckoutController extends Controller
                 'user_id' => auth()->id(),
                 'order_number' => Order::generateOrderNumber(),
                 'subtotal' => $subtotal,
-                'discount' => $totalOff,
+                'discount' => 0,
                 'total' => $total,
                 'status' => $orderInitialStatus,
                 'shipping_address' => $request->shipping_address,
                 'shipping_phone' => $request->shipping_phone,
-                'coupon_code' => $promo['voucher_code'],
-                'discount_code' => null,
                 'distance_km' => $distanceKm,
                 'shipping_cost' => $shippingCost,
                 'shipping_lat' => $shippingResult['shipping_lat'] ?? null,
@@ -170,8 +159,6 @@ class CheckoutController extends Controller
             if (empty($request->product_id)) {
                 $this->cart->clear();
             }
-
-            $this->promotions->incrementCouponUsage($promo['coupons_to_increment']);
 
             DB::commit();
 

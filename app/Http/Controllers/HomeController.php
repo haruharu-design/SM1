@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HomeBanner;
 use App\Models\Product;
 use App\Models\Wishlist;
 use App\Services\RecommendationService;
@@ -18,7 +19,13 @@ class HomeController extends Controller
         // Rekomendasi personalisasi (B2C) - untuk user yang punya riwayat
         $recommendations = (new RecommendationService())->getRecommendations(6);
 
-        return view('home', compact('products', 'wishlistIds', 'recommendations'));
+        $banners = HomeBanner::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        return view('home', compact('products', 'wishlistIds', 'recommendations', 'banners'));
     }
 }
 

@@ -37,7 +37,13 @@ class PaymentResource extends Resource
                         'bank_transfer' => 'Transfer Bank',
                         default => $state ?? '-',
                     }),
-                Tables\Columns\TextColumn::make('bank_id')->label('Bank')->placeholder('-'),
+                Tables\Columns\TextColumn::make('bankAccount.name')
+                    ->label('Bank')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('bankAccount.account_number')
+                    ->label('No. Rekening')
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->formatStateUsing(fn (string $state) => Payment::statusOptions()[$state] ?? $state)

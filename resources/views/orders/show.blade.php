@@ -51,17 +51,6 @@
                 <span>Subtotal barang @if($order->productDiscountSaved() > 0)<span class="text-xs font-normal text-gray-500">(setelah diskon per produk)</span>@endif</span>
                 <span>Rp {{ number_format($order->subtotal, 0, ',', '.') }}</span>
             </div>
-            @if($order->discount > 0)
-            <div class="flex justify-between text-green-700">
-                <span>
-                    Voucher
-                    @if($order->coupon_code)
-                        <span class="block text-xs font-normal text-gray-600">{{ $order->coupon_code }}</span>
-                    @endif
-                </span>
-                <span>− Rp {{ number_format($order->discount, 0, ',', '.') }}</span>
-            </div>
-            @endif
             @if($order->shipping_cost)
             <div class="flex justify-between">
                 <span>Ongkir {{ $order->distance_km ? '(' . $order->distance_km . ' km)' : '(estimasi)' }}</span>
@@ -84,11 +73,8 @@
                 Cash On Delivery (COD) — Bayar saat barang diterima
             @else
                 Transfer Bank
-                @if($payment->bank_id)
-                    @php $banks = collect(config('banks.accounts', []))->keyBy('id'); $bank = $banks->get($payment->bank_id); @endphp
-                    @if($bank)
-                        — {{ $bank['name'] }} {{ $bank['account_number'] }} a.n. {{ $bank['account_name'] }}
-                    @endif
+                @if($payment->bankAccount)
+                    — {{ $payment->bankAccount->name }} {{ $payment->bankAccount->account_number }} a.n. {{ $payment->bankAccount->account_name }}
                 @endif
             @endif
         </p>

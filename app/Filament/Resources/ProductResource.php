@@ -49,7 +49,7 @@ class ProductResource extends Resource
                     ->maxValue(100)
                     ->suffix('%')
                     ->placeholder('0 atau kosong = tanpa diskon')
-                    ->helperText('Potongan per item, bukan kode voucher. Harga jual = harga katalog dikurangi persen ini.'),
+                    ->helperText('Potongan per item. Harga jual = harga katalog dikurangi persen ini.'),
                 Forms\Components\TextInput::make('stock')
                     ->required()
                     ->numeric()

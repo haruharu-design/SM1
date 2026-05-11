@@ -1,0 +1,11 @@
+<?php
+
+namespace App\Filament\Resources\HomeBannerResource\Pages;
+
+use App\Filament\Resources\HomeBannerResource;
+use Filament\Resources\Pages\EditRecord;
+
+class EditHomeBanner extends EditRecord
+{
+    protected static string $resource = HomeBannerResource::class;
+}

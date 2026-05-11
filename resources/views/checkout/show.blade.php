@@ -60,20 +60,6 @@
                 </div>
                 @endforeach
             </div>
-            <div class="mt-6 pt-4 border-t border-dashed">
-                <h3 class="text-sm font-semibold text-gray-800 mb-2">Voucher</h3>
-                <p class="text-xs text-gray-600 mb-3">Diskon per produk diatur di admin produk (persen). Kode voucher di sini memotong subtotal barang seperti kupon pesanan.</p>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kode voucher</label>
-                    <input type="text" name="voucher_code" value="{{ old('voucher_code') }}"
-                        class="w-full max-w-md border border-gray-300 rounded-lg px-3 py-2 uppercase"
-                        placeholder="Opsional" autocomplete="off">
-                    @error('voucher_code')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
             <div class="mt-4 pt-4 border-t space-y-2">
                 <div class="flex justify-between">
                     <span>Subtotal Produk</span>
@@ -117,17 +103,17 @@
                 <select name="bank_id" class="w-full border rounded-lg px-4 py-2">
                     <option value="">-- Pilih Bank --</option>
                     @foreach($banks as $bank)
-                    <option value="{{ $bank['id'] }}" {{ old('bank_id') === $bank['id'] ? 'selected' : '' }}>
-                        {{ $bank['name'] }} - {{ $bank['account_number'] }} ({{ $bank['account_name'] }})
+                    <option value="{{ $bank->code }}" {{ old('bank_id') === $bank->code ? 'selected' : '' }}>
+                        {{ $bank->name }} - {{ $bank->account_number }} ({{ $bank->account_name }})
                     </option>
                     @endforeach
                 </select>
                 @if(count($banks) > 0)
                 <div class="mt-2 p-3 bg-gray-50 rounded text-sm" id="bank-details">
                     @php $first = $banks[0]; @endphp
-                    <p><strong>{{ $first['name'] }}</strong></p>
-                    <p>No. Rek: {{ $first['account_number'] }}</p>
-                    <p>a.n. {{ $first['account_name'] }}</p>
+                    <p><strong>{{ $first->name }}</strong></p>
+                    <p>No. Rek: {{ $first->account_number }}</p>
+                    <p>a.n. {{ $first->account_name }}</p>
                 </div>
                 @endif
             </div>

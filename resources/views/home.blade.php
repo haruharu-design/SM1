@@ -16,53 +16,33 @@
 
         <!-- Slides -->
         <div id="carousel" class="flex transition-transform duration-700">
-
-            <!-- Slide 1 -->
-            <div class="min-w-full h-64 flex items-center justify-center
-                        bg-gradient-to-r from-red-500 to-red-400 text-white">
+            @php
+                $fallbackBanners = collect([
+                    ['title' => 'Promo Spesial Hari Ini', 'subtitle' => 'Diskon menarik untuk produk pilihan', 'gradient_from' => 'from-red-500', 'gradient_to' => 'to-red-400'],
+                    ['title' => 'Koleksi Terbaru', 'subtitle' => 'Produk terbaru dengan kualitas terbaik', 'gradient_from' => 'from-blue-500', 'gradient_to' => 'to-blue-400'],
+                    ['title' => 'Belanja Lebih Mudah', 'subtitle' => 'Pengalaman belanja nyaman dan aman', 'gradient_from' => 'from-purple-500', 'gradient_to' => 'to-pink-500'],
+                ]);
+                $carouselBanners = isset($banners) && $banners->isNotEmpty() ? $banners : $fallbackBanners;
+            @endphp
+            @foreach($carouselBanners as $banner)
+            <div class="min-w-full h-64 flex items-center justify-center bg-gradient-to-r {{ $banner['gradient_from'] ?? $banner->gradient_from }} {{ $banner['gradient_to'] ?? $banner->gradient_to }} text-white">
                 <div class="text-center px-6">
                     <h2 class="text-3xl font-bold mb-2">
-                        Promo Spesial Hari Ini
+                        {{ $banner['title'] ?? $banner->title }}
                     </h2>
                     <p class="text-white/90">
-                        Diskon menarik untuk produk pilihan
+                        {{ $banner['subtitle'] ?? $banner->subtitle }}
                     </p>
                 </div>
             </div>
-
-            <!-- Slide 2 -->
-            <div class="min-w-full h-64 flex items-center justify-center
-                        bg-gradient-to-r from-blue-500 to-blue-400 text-white">
-                <div class="text-center px-6">
-                    <h2 class="text-3xl font-bold mb-2">
-                        Koleksi Terbaru
-                    </h2>
-                    <p class="text-white/90">
-                        Produk terbaru dengan kualitas terbaik
-                    </p>
-                </div>
-            </div>
-
-            <!-- Slide 3 -->
-            <div class="min-w-full h-64 flex items-center justify-center
-                        bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                <div class="text-center px-6">
-                    <h2 class="text-3xl font-bold mb-2">
-                        Belanja Lebih Mudah
-                    </h2>
-                    <p class="text-white/90">
-                        Pengalaman belanja nyaman dan aman
-                    </p>
-                </div>
-            </div>
-
+            @endforeach
         </div>
 
         <!-- Indicator -->
         <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-            <span class="dot w-3 h-3 bg-white/50 rounded-full"></span>
-            <span class="dot w-3 h-3 bg-white/50 rounded-full"></span>
-            <span class="dot w-3 h-3 bg-white/50 rounded-full"></span>
+            @foreach($carouselBanners as $unused)
+                <span class="dot w-3 h-3 bg-white/50 rounded-full"></span>
+            @endforeach
         </div>
     </div>
 
@@ -204,7 +184,7 @@
     const carousel = document.getElementById('carousel');
     const dots = document.querySelectorAll('.dot');
     let index = 0;
-    const totalSlides = 3;
+    const totalSlides = dots.length || 1;
 
     function showSlide(i) {
         carousel.style.transform = `translateX(-${i * 100}%)`;

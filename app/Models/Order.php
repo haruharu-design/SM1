@@ -21,8 +21,6 @@ class Order extends Model
         'shipping_address',
         'shipping_phone',
         'tracking_number',
-        'coupon_code',
-        'discount_code',
         'distance_km',
         'shipping_cost',
         'shipping_lat',
@@ -117,7 +115,7 @@ class Order extends Model
             ->first();
     }
 
-    /** Total penghematan dari diskon persen per produk (bukan voucher). */
+    /** Total penghematan dari diskon persen per produk. */
     public function productDiscountSaved(): float
     {
         return round((float) $this->items->sum(function (OrderItem $item): float {

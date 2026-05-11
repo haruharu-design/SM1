@@ -39,7 +39,7 @@ class Product extends Model
         return round((float) $this->price, 2);
     }
 
-    /** Harga jual per unit setelah diskon persen per produk (bukan voucher). */
+    /** Harga jual per unit setelah diskon persen per produk. */
     public function sellingUnitPrice(): float
     {
         $list = $this->listUnitPrice();
