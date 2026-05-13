@@ -7,6 +7,9 @@
     @if(session('success'))
         <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">{{ session('success') }}</div>
     @endif
+    @if(session('error'))
+        <div class="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">{{ session('error') }}</div>
+    @endif
 
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-900">{{ $order->order_number }}</h1>
@@ -78,12 +81,27 @@
                 @endif
             @endif
         </p>
-        <p class="text-sm text-gray-600 mt-1">Status: {{ \App\Models\Payment::statusOptions()[$payment->status] ?? $payment->status }}</p>
+        <p class="text-sm text-gray-600 mt-1">Status pembayaran: {{ \App\Models\Payment::statusOptions()[$payment->status] ?? $payment->status }}</p>
     </div>
     @endif
 
-    @if(in_array($order->status, ['menunggu_pembayaran']) && $payment && $payment->status === 'awaiting_confirmation')
-    <p class="text-gray-600 text-sm">Silakan lakukan transfer ke rekening di atas. Setelah transfer, admin akan mengonfirmasi pembayaran Anda.</p>
+    @if($order->status === 'menunggu_pembayaran' && $payment && $payment->method === 'bank_transfer' && $payment->status === 'pending')
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-amber-900 text-sm space-y-3">
+            <p>Silakan transfer tepat sesuai <strong>total</strong> ke rekening di atas. Setelah Anda transfer, tekan tombol di bawah agar pesanan masuk antrean <strong>verifikasi admin</strong>.</p>
+            <form action="{{ route('orders.payment-complete', $order) }}" method="POST" onsubmit="return confirm('Tandai bahwa Anda sudah melakukan transfer? Pastikan nominal dan rekening tujuan sudah benar.');">
+                @csrf
+                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-blue-500 text-white font-medium hover:opacity-90 transition-opacity">
+                    Sudah selesai bayar
+                </button>
+            </form>
+        </div>
+    @endif
+
+    @if($order->status === 'menunggu_pembayaran' && $payment && $payment->method === 'bank_transfer' && $payment->status === 'awaiting_confirmation')
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-blue-900 text-sm">
+            <p class="font-semibold mb-1">Menunggu konfirmasi admin</p>
+            <p>Pembayaran Anda sudah dilaporkan. Admin akan memverifikasi transfer; setelah disetujui, pesanan akan diproses dan Anda mendapat notifikasi.</p>
+        </div>
     @endif
     @if($order->status === 'menunggu_pembayaran' && $payment && $payment->method === 'cod')
     <p class="text-gray-600 text-sm">Pembayaran dilakukan saat barang diterima (COD).</p>

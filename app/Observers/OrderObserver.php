@@ -52,7 +52,9 @@ class OrderObserver
 
         return match ($newStatus) {
             Order::STATUS_WAITING_PAYMENT => 'awaiting_payment',
-            Order::STATUS_PROCESSING => 'processing',
+            Order::STATUS_PROCESSING => $oldStatus === Order::STATUS_WAITING_PAYMENT
+                ? 'payment_verified'
+                : 'processing',
             Order::STATUS_SHIPPED => 'shipped',
             Order::STATUS_COMPLETED => 'completed',
             Order::STATUS_CANCELLED => 'cancelled',

@@ -115,6 +115,24 @@ class Order extends Model
             ->first();
     }
 
+    /** Transfer bank: user belum menekan "Selesai bayar" (masih pending). */
+    public function userCanMarkBankTransferComplete(): bool
+    {
+        return $this->status === self::STATUS_WAITING_PAYMENT
+            && $this->payments()
+                ->where('status', Payment::STATUS_PENDING)
+                ->where('method', Payment::METHOD_BANK_TRANSFER)
+                ->exists();
+    }
+
+    public function getPendingBankTransferPayment(): ?Payment
+    {
+        return $this->payments()
+            ->where('status', Payment::STATUS_PENDING)
+            ->where('method', Payment::METHOD_BANK_TRANSFER)
+            ->first();
+    }
+
     /** Total penghematan dari diskon persen per produk. */
     public function productDiscountSaved(): float
     {

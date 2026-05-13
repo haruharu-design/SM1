@@ -25,15 +25,34 @@
                 $carouselBanners = isset($banners) && $banners->isNotEmpty() ? $banners : $fallbackBanners;
             @endphp
             @foreach($carouselBanners as $banner)
-            <div class="min-w-full h-64 flex items-center justify-center bg-gradient-to-r {{ $banner['gradient_from'] ?? $banner->gradient_from }} {{ $banner['gradient_to'] ?? $banner->gradient_to }} text-white">
-                <div class="text-center px-6">
-                    <h2 class="text-3xl font-bold mb-2">
-                        {{ $banner['title'] ?? $banner->title }}
-                    </h2>
-                    <p class="text-white/90">
-                        {{ $banner['subtitle'] ?? $banner->subtitle }}
-                    </p>
-                </div>
+            @php
+                $img = is_array($banner) ? ($banner['image_path'] ?? null) : ($banner->image_path ?? null);
+                $gFrom = is_array($banner) ? ($banner['gradient_from'] ?? 'from-red-500') : $banner->gradient_from;
+                $gTo = is_array($banner) ? ($banner['gradient_to'] ?? 'to-red-400') : $banner->gradient_to;
+                $title = is_array($banner) ? ($banner['title'] ?? '') : $banner->title;
+                $subtitle = is_array($banner) ? ($banner['subtitle'] ?? '') : $banner->subtitle;
+            @endphp
+            <div class="min-w-full h-64 relative flex items-center justify-center overflow-hidden bg-gray-900">
+                @if($img)
+                    <img src="{{ asset('storage/'.$img) }}" alt="" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
+                    <div class="absolute inset-0 bg-black/45 flex items-center justify-center">
+                        <div class="text-center px-6 text-white relative z-10">
+                            <h2 class="text-3xl font-bold mb-2 drop-shadow-sm">{{ $title }}</h2>
+                            @if($subtitle)
+                                <p class="text-white/95 drop-shadow-sm">{{ $subtitle }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @else
+                    <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-r {{ $gFrom }} {{ $gTo }} text-white">
+                        <div class="text-center px-6">
+                            <h2 class="text-3xl font-bold mb-2">{{ $title }}</h2>
+                            @if($subtitle)
+                                <p class="text-white/90">{{ $subtitle }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             </div>
             @endforeach
         </div>

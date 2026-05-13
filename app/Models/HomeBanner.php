@@ -9,6 +9,7 @@ class HomeBanner extends Model
     protected $fillable = [
         'title',
         'subtitle',
+        'image_path',
         'gradient_from',
         'gradient_to',
         'is_active',

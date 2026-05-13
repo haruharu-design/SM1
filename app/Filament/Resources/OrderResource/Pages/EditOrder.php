@@ -20,7 +20,7 @@ class EditOrder extends EditRecord
                 ->color('success')
                 ->requiresConfirmation()
                 ->modalHeading('Konfirmasi pembayaran transfer?')
-                ->modalDescription('Tandai pembayaran sudah diterima. Pesanan akan masuk tahap diproses setelah beberapa detik.')
+                ->modalDescription('Hanya jika pembeli sudah menandai selesai bayar. Pastikan transfer sudah masuk. Pesanan akan diproses setelah konfirmasi.')
                 ->visible(fn (): bool => $this->record->awaitsAdminBankTransferConfirmation())
                 ->action(function (): void {
                     $payment = $this->record->getAwaitingBankTransferPayment();

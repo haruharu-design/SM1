@@ -105,7 +105,7 @@ class OrderResource extends Resource
                     ->color('success')
                     ->requiresConfirmation()
                     ->modalHeading('Konfirmasi pembayaran transfer?')
-                    ->modalDescription('Sama seperti tombol di halaman pembayaran: status pembayaran jadi terkonfirmasi dan pesanan diproses.')
+                    ->modalDescription('Hanya untuk pesanan yang sudah dilaporkan pembeli sebagai «sudah bayar». Pastikan transfer sudah masuk ke rekening. Pesanan akan diproses setelah konfirmasi.')
                     ->visible(fn (Order $record): bool => $record->awaitsAdminBankTransferConfirmation())
                     ->action(function (Order $record): void {
                         $payment = $record->getAwaitingBankTransferPayment();

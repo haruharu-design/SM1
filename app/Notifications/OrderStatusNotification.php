@@ -62,7 +62,17 @@ class OrderStatusNotification extends Notification
         return match ($this->event) {
             'awaiting_payment' => [
                 'title' => 'Menunggu pembayaran',
-                'body' => 'Pesanan '.$no.' telah dibuat. Silakan selesaikan pembayaran transfer sesuai instruksi di halaman detail pesanan.',
+                'body' => 'Pesanan '.$no.' telah dibuat. Silakan transfer sesuai nominal ke rekening di halaman detail pesanan. Setelah transfer, tekan tombol «Sudah selesai bayar» agar admin dapat memverifikasi pembayaran Anda.',
+                'order_id' => $this->order->id,
+            ],
+            'awaiting_transfer_confirmation' => [
+                'title' => 'Menunggu konfirmasi pembayaran',
+                'body' => 'Anda sudah menandai selesai bayar untuk pesanan '.$no.'. Pembayaran akan dicek oleh admin; Anda akan menerima notifikasi setelah pembayaran diverifikasi.',
+                'order_id' => $this->order->id,
+            ],
+            'payment_verified' => [
+                'title' => 'Pembayaran berhasil',
+                'body' => 'Pembayaran pesanan '.$no.' telah dikonfirmasi admin. Pesanan Anda sedang diproses.',
                 'order_id' => $this->order->id,
             ],
             'processing' => [

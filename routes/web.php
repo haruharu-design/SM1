@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     // Orders (riwayat pesanan)
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/selesai-bayar', [OrderController::class, 'markBankTransferComplete'])->name('orders.payment-complete');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');

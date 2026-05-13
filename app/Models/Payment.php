@@ -45,7 +45,7 @@ class Payment extends Model
     {
         return [
             self::STATUS_PENDING => 'Pending',
-            self::STATUS_AWAITING_CONFIRMATION => 'Menunggu Konfirmasi',
+            self::STATUS_AWAITING_CONFIRMATION => 'Menunggu Konfirmasi Admin',
             self::STATUS_CONFIRMED => 'Terkonfirmasi',
             self::STATUS_FAILED => 'Gagal',
         ];
@@ -64,6 +64,24 @@ class Payment extends Model
     public function isConfirmed(): bool
     {
         return $this->status === self::STATUS_CONFIRMED;
+    }
+
+    /**
+     * Pembeli menandai sudah melakukan transfer; status berubah menunggu verifikasi admin.
+     */
+    public function markTransferReportedByCustomer(): void
+    {
+        if ($this->method !== self::METHOD_BANK_TRANSFER) {
+            throw new \RuntimeException('Hanya pembayaran transfer bank yang dapat ditandai.');
+        }
+
+        if ($this->status !== self::STATUS_PENDING) {
+            throw new \RuntimeException('Status pembayaran tidak memungkinkan tindakan ini.');
+        }
+
+        $this->update([
+            'status' => self::STATUS_AWAITING_CONFIRMATION,
+        ]);
     }
 
     /**

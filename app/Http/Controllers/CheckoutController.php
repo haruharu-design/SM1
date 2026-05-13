@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankAccount;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Product;
-use App\Models\BankAccount;
 use App\Services\CartService;
 use App\Services\ShippingService;
 use Illuminate\Http\Request;
@@ -82,6 +82,7 @@ class CheckoutController extends Controller
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get(['code', 'name', 'account_number', 'account_name']);
+
         return view('checkout.show', compact('items', 'subtotal', 'isDirectBuy', 'banks'));
     }
 
@@ -134,7 +135,7 @@ class CheckoutController extends Controller
 
         // Hitung ongkir
         $shippingResult = $this->shipping->calculateFromAddress($request->shipping_address);
-        if (!$shippingResult['success']) {
+        if (! $shippingResult['success']) {
             return back()
                 ->withInput()
                 ->with('error', $shippingResult['message'] ?? 'Gagal menghitung biaya pengiriman.');
@@ -188,7 +189,7 @@ class CheckoutController extends Controller
                 $p->decrement('stock', $orderQty);
             }
 
-            $paymentStatus = $isCod ? Payment::STATUS_PENDING : Payment::STATUS_AWAITING_CONFIRMATION;
+            $paymentStatus = Payment::STATUS_PENDING;
 
             Payment::create([
                 'order_id' => $order->id,
@@ -206,11 +207,12 @@ class CheckoutController extends Controller
 
             $message = $isCod
                 ? 'Pesanan berhasil dibuat. Pembayaran dilakukan saat barang diterima (COD).'
-                : 'Pesanan berhasil dibuat. Silakan lakukan transfer ke rekening yang tercantum.';
+                : 'Pesanan berhasil dibuat. Silakan transfer sesuai total, lalu tekan «Sudah selesai bayar» di halaman detail pesanan agar admin dapat memverifikasi.';
 
             return redirect()->route('orders.show', $order->id)->with('success', $message);
         } catch (\Throwable $e) {
             DB::rollBack();
+
             return back()
                 ->withInput()
                 ->with('error', $e->getMessage() ?: 'Gagal membuat pesanan. Silakan coba lagi.');

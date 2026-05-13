@@ -51,6 +51,7 @@ class PaymentResource extends Resource
                         Payment::STATUS_CONFIRMED => 'success',
                         Payment::STATUS_FAILED => 'danger',
                         Payment::STATUS_AWAITING_CONFIRMATION => 'warning',
+                        Payment::STATUS_PENDING => 'gray',
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('paid_at')

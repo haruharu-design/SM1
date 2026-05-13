@@ -30,6 +30,13 @@ class HomeBannerResource extends Resource
                 ->maxLength(255),
             Forms\Components\TextInput::make('subtitle')
                 ->maxLength(255),
+            Forms\Components\FileUpload::make('image_path')
+                ->label('Gambar banner')
+                ->image()
+                ->directory('home-banners')
+                ->visibility('public')
+                ->helperText('Opsional. Tampilan di beranda tetap tinggi 256px (seperti sekarang); gambar dipotong proporsional (object-cover). Disarankan rasio lebar, mis. 3:1 atau 16:9, min. lebar 1200px.')
+                ->nullable(),
             Forms\Components\TextInput::make('gradient_from')
                 ->required()
                 ->default('from-red-500')
@@ -60,6 +67,10 @@ class HomeBannerResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('subtitle')
                     ->limit(60),
+                Tables\Columns\ImageColumn::make('image_path')
+                    ->label('Gambar')
+                    ->disk('public')
+                    ->height(48),
                 Tables\Columns\TextColumn::make('gradient_from')
                     ->badge(),
                 Tables\Columns\TextColumn::make('gradient_to')

@@ -16,7 +16,18 @@ class StatsOverviewWidget extends BaseWidget
     {
         $totalUsers = User::count();
         $totalOrders = Order::count();
-        $totalRevenue = Payment::where('status', 'paid')->sum('amount');
+        // Pembayaran transfer: status `confirmed` setelah admin verifikasi (bukan `paid`).
+        $confirmedTransfer = Payment::query()
+            ->where('status', Payment::STATUS_CONFIRMED)
+            ->sum('amount');
+
+        // COD: catatan pembayaran tetap `pending` sampai tidak di-update; hitung dari pesanan selesai.
+        $codCompleted = Payment::query()
+            ->where('method', Payment::METHOD_COD)
+            ->whereHas('order', fn ($q) => $q->where('status', Order::STATUS_COMPLETED))
+            ->sum('amount');
+
+        $totalRevenue = (float) $confirmedTransfer + (float) $codCompleted;
 
         return [
             Stat::make('Total User', $totalUsers)
@@ -27,7 +38,7 @@ class StatsOverviewWidget extends BaseWidget
                 ->description('Seluruh pesanan')
                 ->descriptionIcon('heroicon-m-shopping-bag')
                 ->color('info'),
-            Stat::make('Total Pendapatan', 'Rp ' . number_format($totalRevenue, 0, ',', '.'))
+            Stat::make('Total Pendapatan', 'Rp '.number_format($totalRevenue, 0, ',', '.'))
                 ->description('Dari pembayaran berhasil')
                 ->descriptionIcon('heroicon-m-currency-dollar')
                 ->color('success'),
