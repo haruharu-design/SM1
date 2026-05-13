@@ -73,12 +73,21 @@
                 <p class="text-gray-600">
                     {{ $product->description ?: 'Tidak ada deskripsi' }}
                 </p>
+                <p class="mt-3 text-sm font-medium {{ (int) $product->stock > 0 ? 'text-emerald-700' : 'text-red-600' }}">
+                    Stok:
+                    @if((int) $product->stock > 0)
+                        {{ (int) $product->stock }} tersedia
+                    @else
+                        Habis
+                    @endif
+                </p>
             </div>
 
             <div class="mb-6">
                 <label class="block text-sm font-bold mb-2 text-gray-600">Jumlah</label>
-                <input type="number" min="1" max="{{ max(1, $product->stock ?? 999) }}"
-                       class="w-24 px-4 py-2 border border-gray-300 rounded" value="1" id="qty" name="quantity">
+                <input type="number" min="1" max="{{ max(1, (int) ($product->stock ?? 0)) }}"
+                       class="w-24 px-4 py-2 border border-gray-300 rounded disabled:bg-gray-100 disabled:text-gray-500"
+                       value="1" id="qty" name="quantity" {{ (int) $product->stock <= 0 ? 'disabled' : '' }}>
             </div>
 
             @auth
@@ -87,7 +96,7 @@
                 <form action="{{ route('checkout.show') }}" method="GET" class="inline" id="form-beli-langsung">
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="quantity" id="qty-beli-langsung" value="1">
-                    <button type="submit" class="bg-gradient-to-r from-red-500 to-blue-500 text-white px-6 py-3 rounded-lg hover:opacity-90 font-bold">
+                    <button type="submit" class="bg-gradient-to-r from-red-500 to-blue-500 text-white px-6 py-3 rounded-lg hover:opacity-90 font-bold disabled:opacity-50 disabled:cursor-not-allowed" {{ (int) $product->stock <= 0 ? 'disabled' : '' }}>
                         Beli Langsung
                     </button>
                 </form>
@@ -96,20 +105,27 @@
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="quantity" id="qty-keranjang" value="1">
-                    <button type="submit" class="border-2 border-gray-800 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-100 font-bold">
+                    <button type="submit" class="border-2 border-gray-800 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-100 font-bold disabled:opacity-50 disabled:cursor-not-allowed" {{ (int) $product->stock <= 0 ? 'disabled' : '' }}>
                         Tambah ke Keranjang
                     </button>
                 </form>
             </div>
+            @if((int) $product->stock <= 0)
+            <p class="mt-3 text-sm text-red-600">Produk sedang habis, jadi belum bisa dibeli.</p>
+            @endif
             <script>
                 function syncQty() {
-                    var v = Math.max(1, parseInt(document.getElementById('qty').value) || 1);
+                    var qtyInput = document.getElementById('qty');
+                    if (!qtyInput) return;
+                    var maxStock = parseInt(qtyInput.getAttribute('max')) || 1;
+                    var v = Math.max(1, Math.min(maxStock, parseInt(qtyInput.value) || 1));
+                    qtyInput.value = v;
                     document.getElementById('qty-beli-langsung').value = v;
                     document.getElementById('qty-keranjang').value = v;
                 }
-                document.getElementById('qty').addEventListener('change', syncQty);
-                document.getElementById('form-beli-langsung').addEventListener('submit', syncQty);
-                document.getElementById('form-keranjang').addEventListener('submit', syncQty);
+                document.getElementById('qty')?.addEventListener('change', syncQty);
+                document.getElementById('form-beli-langsung')?.addEventListener('submit', syncQty);
+                document.getElementById('form-keranjang')?.addEventListener('submit', syncQty);
             </script>
             @else
             <p class="text-gray-600 mb-2">Login untuk membeli produk.</p>

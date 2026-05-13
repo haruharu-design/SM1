@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Order;
+use App\Models\ProductQuestion;
 use App\Observers\OrderObserver;
+use App\Observers\ProductQuestionObserver;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
@@ -32,5 +34,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useTailwind();
         Order::observe(OrderObserver::class);
+        ProductQuestion::observe(ProductQuestionObserver::class);
     }
 }

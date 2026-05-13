@@ -33,6 +33,14 @@ class CheckoutController extends Controller
             // Beli Langsung: 1 produk, qty dari param (default 1)
             $product = Product::where('is_active', true)->findOrFail($request->product_id);
             $qty = max(1, (int) $request->get('quantity', 1));
+            if ((int) ($product->stock ?? 0) <= 0) {
+                return redirect()->route('products.show', $product->id)
+                    ->with('error', 'Stok produk habis, tidak bisa checkout.');
+            }
+            if ($qty > (int) $product->stock) {
+                return redirect()->route('products.show', $product->id)
+                    ->with('error', 'Jumlah melebihi stok tersedia (stok: '.(int) $product->stock.').');
+            }
             $line = $product->sellingUnitPrice() * $qty;
             $items = [[
                 'product' => $product,
@@ -49,6 +57,23 @@ class CheckoutController extends Controller
             if (empty($items)) {
                 return redirect()->route('cart.index')
                     ->with('error', 'Keranjang kosong. Tambahkan produk terlebih dahulu.');
+            }
+
+            foreach ($items as $item) {
+                $stock = (int) ($item['product']->stock ?? 0);
+                if ($stock <= 0) {
+                    $this->cart->remove($item['product']->id);
+
+                    return redirect()->route('cart.index')
+                        ->with('error', 'Ada produk yang stoknya habis. Item tersebut sudah dihapus dari keranjang.');
+                }
+
+                if ((int) $item['quantity'] > $stock) {
+                    $this->cart->update($item['product']->id, $stock);
+
+                    return redirect()->route('cart.index')
+                        ->with('error', 'Jumlah item keranjang disesuaikan dengan stok terbaru.');
+                }
             }
         }
 
@@ -81,6 +106,14 @@ class CheckoutController extends Controller
             // Beli Langsung
             $product = Product::where('is_active', true)->findOrFail($request->product_id);
             $qty = max(1, (int) $request->quantity);
+            if ((int) ($product->stock ?? 0) <= 0) {
+                return redirect()->route('products.show', $product->id)
+                    ->with('error', 'Stok produk habis, tidak bisa checkout.');
+            }
+            if ($qty > (int) $product->stock) {
+                return redirect()->route('products.show', $product->id)
+                    ->with('error', 'Jumlah melebihi stok tersedia (stok: '.(int) $product->stock.').');
+            }
             $line = $product->sellingUnitPrice() * $qty;
             $items = [[
                 'product' => $product,
@@ -135,15 +168,24 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($items as $item) {
-                $p = $item['product'];
+                $p = Product::query()->lockForUpdate()->findOrFail($item['product']->id);
+                $orderQty = (int) $item['quantity'];
+                $stock = (int) ($p->stock ?? 0);
+
+                if ($stock < $orderQty) {
+                    throw new \RuntimeException('Stok produk '.$p->name.' tidak mencukupi. Silakan cek ulang keranjang.');
+                }
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $p->id,
-                    'quantity' => $item['quantity'],
+                    'quantity' => $orderQty,
                     'list_unit_price' => $p->listUnitPrice(),
                     'unit_price' => $p->sellingUnitPrice(),
-                    'total_price' => $item['subtotal'],
+                    'total_price' => round($p->sellingUnitPrice() * $orderQty, 2),
                 ]);
+
+                $p->decrement('stock', $orderQty);
             }
 
             $paymentStatus = $isCod ? Payment::STATUS_PENDING : Payment::STATUS_AWAITING_CONFIRMATION;
@@ -171,7 +213,7 @@ class CheckoutController extends Controller
             DB::rollBack();
             return back()
                 ->withInput()
-                ->with('error', 'Gagal membuat pesanan. Silakan coba lagi.');
+                ->with('error', $e->getMessage() ?: 'Gagal membuat pesanan. Silakan coba lagi.');
         }
     }
 }

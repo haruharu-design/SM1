@@ -9,6 +9,9 @@
     @if(session('success'))
         <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">{{ session('success') }}</div>
     @endif
+    @if(session('error'))
+        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">{{ session('error') }}</div>
+    @endif
 
     @if(empty($items))
         <div class="text-center py-12 text-gray-600">
@@ -37,7 +40,12 @@
                                 @else
                                     <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">No img</div>
                                 @endif
-                                <span class="font-medium">{{ $item['product']->name }}</span>
+                                <div>
+                                    <span class="font-medium">{{ $item['product']->name }}</span>
+                                    <p class="text-xs {{ (int) $item['product']->stock > 0 ? 'text-gray-500' : 'text-red-600' }}">
+                                        Stok: {{ max(0, (int) $item['product']->stock) }}
+                                    </p>
+                                </div>
                             </div>
                         </td>
                         <td class="px-4 py-4">
@@ -51,7 +59,7 @@
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="product_id" value="{{ $item['product']->id }}">
-                                <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1" class="w-20 px-2 py-1 border rounded">
+                                <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1" max="{{ max(1, (int) $item['product']->stock) }}" class="w-20 px-2 py-1 border rounded">
                                 <button type="submit" class="text-sm text-blue-600 hover:underline">Update</button>
                             </form>
                         </td>

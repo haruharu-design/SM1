@@ -28,7 +28,22 @@ class CartController extends Controller
         ]);
 
         $product = Product::where('is_active', true)->findOrFail($request->product_id);
-        $this->cart->add($product->id, $request->quantity);
+        $qtyToAdd = (int) $request->quantity;
+        $stock = (int) ($product->stock ?? 0);
+
+        if ($stock <= 0) {
+            return back()->with('error', 'Stok produk habis, tidak bisa ditambahkan ke keranjang.');
+        }
+
+        $existingQty = collect($this->cart->getItems())
+            ->firstWhere('product.id', $product->id)['quantity'] ?? 0;
+        $targetQty = (int) $existingQty + $qtyToAdd;
+
+        if ($targetQty > $stock) {
+            return back()->with('error', 'Jumlah melebihi stok tersedia (stok: '.$stock.').');
+        }
+
+        $this->cart->add($product->id, $qtyToAdd);
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -48,7 +63,15 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:0',
         ]);
 
-        $this->cart->update($request->product_id, $request->quantity);
+        $product = Product::where('is_active', true)->findOrFail($request->product_id);
+        $stock = (int) ($product->stock ?? 0);
+        $newQty = (int) $request->quantity;
+
+        if ($newQty > $stock) {
+            return back()->with('error', 'Jumlah melebihi stok tersedia (stok: '.$stock.').');
+        }
+
+        $this->cart->update($request->product_id, $newQty);
 
         if ($request->wantsJson()) {
             return response()->json([

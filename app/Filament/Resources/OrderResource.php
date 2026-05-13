@@ -86,6 +86,10 @@ class OrderResource extends Resource
                         Order::STATUS_CANCELLED => 'danger',
                         default => 'gray',
                     }),
+                Tables\Columns\SelectColumn::make('status')
+                    ->label('Update Status')
+                    ->options(Order::statusOptions())
+                    ->selectablePlaceholder(false),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
