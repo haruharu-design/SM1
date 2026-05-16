@@ -97,39 +97,59 @@ class Order extends Model
         return $prefix.$date.str_pad((string) $last, 4, '0', STR_PAD_LEFT);
     }
 
-    /** Order transfer bank menunggu admin konfirmasi pembayaran */
+    /** Order transfer bank / QRIS menunggu admin konfirmasi pembayaran */
     public function awaitsAdminBankTransferConfirmation(): bool
+    {
+        return $this->awaitsAdminPaymentConfirmation();
+    }
+
+    public function awaitsAdminPaymentConfirmation(): bool
     {
         return $this->status === self::STATUS_WAITING_PAYMENT
             && $this->payments()
                 ->where('status', Payment::STATUS_AWAITING_CONFIRMATION)
-                ->where('method', Payment::METHOD_BANK_TRANSFER)
+                ->whereIn('method', [Payment::METHOD_BANK_TRANSFER, Payment::METHOD_QRIS])
                 ->exists();
     }
 
     public function getAwaitingBankTransferPayment(): ?Payment
     {
+        return $this->getAwaitingPaymentConfirmation();
+    }
+
+    public function getAwaitingPaymentConfirmation(): ?Payment
+    {
         return $this->payments()
             ->where('status', Payment::STATUS_AWAITING_CONFIRMATION)
-            ->where('method', Payment::METHOD_BANK_TRANSFER)
+            ->whereIn('method', [Payment::METHOD_BANK_TRANSFER, Payment::METHOD_QRIS])
             ->first();
     }
 
-    /** Transfer bank: user belum menekan "Selesai bayar" (masih pending). */
+    /** Transfer bank / QRIS: user belum menekan "Selesai bayar" (masih pending). */
     public function userCanMarkBankTransferComplete(): bool
+    {
+        return $this->userCanMarkPaymentComplete();
+    }
+
+    public function userCanMarkPaymentComplete(): bool
     {
         return $this->status === self::STATUS_WAITING_PAYMENT
             && $this->payments()
                 ->where('status', Payment::STATUS_PENDING)
-                ->where('method', Payment::METHOD_BANK_TRANSFER)
+                ->whereIn('method', [Payment::METHOD_BANK_TRANSFER, Payment::METHOD_QRIS])
                 ->exists();
     }
 
     public function getPendingBankTransferPayment(): ?Payment
     {
+        return $this->getPendingPayment();
+    }
+
+    public function getPendingPayment(): ?Payment
+    {
         return $this->payments()
             ->where('status', Payment::STATUS_PENDING)
-            ->where('method', Payment::METHOD_BANK_TRANSFER)
+            ->whereIn('method', [Payment::METHOD_BANK_TRANSFER, Payment::METHOD_QRIS])
             ->first();
     }
 

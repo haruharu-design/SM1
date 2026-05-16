@@ -97,6 +97,15 @@
                         <p class="text-sm text-gray-600">Transfer ke rekening toko, admin akan konfirmasi</p>
                     </div>
                 </label>
+                @if($qris)
+                <label class="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                    <input type="radio" name="payment_method" value="qris" {{ old('payment_method') === 'qris' ? 'checked' : '' }} class="mt-1">
+                    <div>
+                        <span class="font-bold">QRIS</span>
+                        <p class="text-sm text-gray-600">Kode QR ditampilkan setelah pesanan dibuat</p>
+                    </div>
+                </label>
+                @endif
             </div>
             <div id="bank-select" class="mt-4 hidden">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Bank Tujuan</label>
@@ -188,7 +197,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="payment_method"]').forEach(function(radio) {
         radio.addEventListener('change', function() {
             var bankSelect = document.getElementById('bank-select');
-            bankSelect.classList.toggle('hidden', this.value !== 'bank_transfer');
+            if (bankSelect) {
+                bankSelect.classList.toggle('hidden', this.value !== 'bank_transfer');
+            }
         });
     });
     document.querySelector('input[name="payment_method"]:checked')?.dispatchEvent(new Event('change'));

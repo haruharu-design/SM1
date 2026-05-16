@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\BankAccount;
+use App\Models\QrisSetting;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Jobs\ProcessOrderAfterPaymentConfirmed;
 use App\Services\CartService;
 use App\Services\ShippingService;
 use Illuminate\Http\Request;
@@ -83,7 +85,9 @@ class CheckoutController extends Controller
             ->orderBy('name')
             ->get(['code', 'name', 'account_number', 'account_name']);
 
-        return view('checkout.show', compact('items', 'subtotal', 'isDirectBuy', 'banks'));
+        $qris = QrisSetting::activeForCheckout();
+
+        return view('checkout.show', compact('items', 'subtotal', 'isDirectBuy', 'banks', 'qris'));
     }
 
     /**
@@ -94,7 +98,7 @@ class CheckoutController extends Controller
         $request->validate([
             'shipping_address' => 'required|string|max:500',
             'shipping_phone' => 'required|string|max:20',
-            'payment_method' => 'required|in:cod,bank_transfer',
+            'payment_method' => 'required|in:cod,bank_transfer,qris',
             'bank_id' => 'required_if:payment_method,bank_transfer|nullable|exists:bank_accounts,code',
             'product_id' => 'nullable|exists:products,id',
             'quantity' => 'nullable|integer|min:1',
@@ -146,6 +150,13 @@ class CheckoutController extends Controller
 
         $paymentMethod = $request->payment_method;
         $isCod = $paymentMethod === Payment::METHOD_COD;
+        $isQris = $paymentMethod === Payment::METHOD_QRIS;
+
+        if ($isQris && ! QrisSetting::activeForCheckout()) {
+            return back()
+                ->withInput()
+                ->with('error', 'Pembayaran QRIS belum tersedia. Silakan pilih metode lain.');
+        }
 
         DB::beginTransaction();
         try {
@@ -195,9 +206,13 @@ class CheckoutController extends Controller
                 'order_id' => $order->id,
                 'amount' => $total,
                 'method' => $paymentMethod,
-                'bank_id' => $request->bank_id,
+                'bank_id' => $isCod || $isQris ? null : $request->bank_id,
                 'status' => $paymentStatus,
             ]);
+
+            if ($isCod) {
+                ProcessOrderAfterPaymentConfirmed::dispatch($order)->delay(now()->addSeconds(5));
+            }
 
             if (empty($request->product_id)) {
                 $this->cart->clear();
@@ -205,9 +220,11 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            $message = $isCod
-                ? 'Pesanan berhasil dibuat. Pembayaran dilakukan saat barang diterima (COD).'
-                : 'Pesanan berhasil dibuat. Silakan transfer sesuai total, lalu tekan «Sudah selesai bayar» di halaman detail pesanan agar admin dapat memverifikasi.';
+            $message = match (true) {
+                $isCod => 'Pesanan berhasil dibuat dan langsung diproses. Pembayaran dilakukan saat barang diterima (COD).',
+                $isQris => 'Pesanan berhasil dibuat. Scan QRIS sesuai total, lalu tekan «Sudah selesai bayar» di halaman detail pesanan agar admin dapat memverifikasi.',
+                default => 'Pesanan berhasil dibuat. Silakan transfer sesuai total, lalu tekan «Sudah selesai bayar» di halaman detail pesanan agar admin dapat memverifikasi.',
+            };
 
             return redirect()->route('orders.show', $order->id)->with('success', $message);
         } catch (\Throwable $e) {

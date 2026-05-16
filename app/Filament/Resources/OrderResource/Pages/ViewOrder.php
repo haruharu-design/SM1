@@ -19,11 +19,11 @@ class ViewOrder extends ViewRecord
                 ->icon('heroicon-o-banknotes')
                 ->color('success')
                 ->requiresConfirmation()
-                ->modalHeading('Konfirmasi pembayaran transfer?')
-                ->modalDescription('Hanya jika pembeli sudah menandai selesai bayar. Pastikan transfer sudah masuk. Pesanan akan diproses setelah konfirmasi.')
-                ->visible(fn (): bool => $this->record->awaitsAdminBankTransferConfirmation())
+                ->modalHeading('Konfirmasi pembayaran?')
+                ->modalDescription('Hanya jika pembeli sudah menandai selesai bayar. Pastikan pembayaran sudah masuk. Pesanan akan diproses setelah konfirmasi.')
+                ->visible(fn (): bool => $this->record->awaitsAdminPaymentConfirmation())
                 ->action(function (): void {
-                    $payment = $this->record->getAwaitingBankTransferPayment();
+                    $payment = $this->record->getAwaitingPaymentConfirmation();
                     if (! $payment) {
                         Notification::make()->title('Gagal')->body('Tidak ada pembayaran yang menunggu konfirmasi.')->danger()->send();
 

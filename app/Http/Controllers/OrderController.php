@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\QrisSetting;
 use App\Notifications\OrderStatusNotification;
 
 class OrderController extends Controller
@@ -23,8 +24,9 @@ class OrderController extends Controller
         }
 
         $order->load(['items.product', 'payments.bankAccount']);
+        $qris = QrisSetting::instance();
 
-        return view('orders.show', compact('order'));
+        return view('orders.show', compact('order', 'qris'));
     }
 
     /**
@@ -36,10 +38,10 @@ class OrderController extends Controller
             abort(403);
         }
 
-        $payment = $order->getPendingBankTransferPayment();
+        $payment = $order->getPendingPayment();
         if (! $payment) {
             return redirect()->route('orders.show', $order)
-                ->with('error', 'Tidak ada pembayaran transfer yang dapat ditandai untuk pesanan ini.');
+                ->with('error', 'Tidak ada pembayaran yang dapat ditandai untuk pesanan ini.');
         }
 
         try {

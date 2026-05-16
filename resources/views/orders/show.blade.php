@@ -74,6 +74,11 @@
         <p>
             @if($payment->method === 'cod')
                 Cash On Delivery (COD) — Bayar saat barang diterima
+            @elseif($payment->method === 'qris')
+                QRIS
+                @if($qris?->label)
+                    — {{ $qris->label }}
+                @endif
             @else
                 Transfer Bank
                 @if($payment->bankAccount)
@@ -83,6 +88,19 @@
         </p>
         <p class="text-sm text-gray-600 mt-1">Status pembayaran: {{ \App\Models\Payment::statusOptions()[$payment->status] ?? $payment->status }}</p>
     </div>
+    @endif
+
+    @if($order->status === 'menunggu_pembayaran' && $payment && $payment->method === 'qris' && $payment->status === 'pending' && $qris?->imageUrl())
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-amber-900 text-sm space-y-3">
+            <p>Scan QRIS di bawah dan bayar tepat sesuai <strong>total</strong>. Setelah bayar, tekan tombol di bawah agar admin dapat memverifikasi.</p>
+            <img src="{{ $qris->imageUrl() }}" alt="QRIS" class="max-w-xs rounded-lg border bg-white p-2">
+            <form action="{{ route('orders.payment-complete', $order) }}" method="POST" onsubmit="return confirm('Tandai bahwa Anda sudah melakukan pembayaran QRIS? Pastikan nominal sudah benar.');">
+                @csrf
+                <button type="submit" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-blue-500 text-white font-medium hover:opacity-90 transition-opacity">
+                    Sudah selesai bayar
+                </button>
+            </form>
+        </div>
     @endif
 
     @if($order->status === 'menunggu_pembayaran' && $payment && $payment->method === 'bank_transfer' && $payment->status === 'pending')
@@ -97,14 +115,17 @@
         </div>
     @endif
 
-    @if($order->status === 'menunggu_pembayaran' && $payment && $payment->method === 'bank_transfer' && $payment->status === 'awaiting_confirmation')
+    @if($order->status === 'menunggu_pembayaran' && $payment && in_array($payment->method, ['bank_transfer', 'qris']) && $payment->status === 'awaiting_confirmation')
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-blue-900 text-sm">
             <p class="font-semibold mb-1">Menunggu konfirmasi admin</p>
-            <p>Pembayaran Anda sudah dilaporkan. Admin akan memverifikasi transfer; setelah disetujui, pesanan akan diproses dan Anda mendapat notifikasi.</p>
+            <p>Pembayaran Anda sudah dilaporkan. Admin akan memverifikasi; setelah disetujui, pesanan akan diproses dan Anda mendapat notifikasi.</p>
         </div>
     @endif
-    @if($order->status === 'menunggu_pembayaran' && $payment && $payment->method === 'cod')
-    <p class="text-gray-600 text-sm">Pembayaran dilakukan saat barang diterima (COD).</p>
+    @if($order->status === 'diproses' && $payment && $payment->method === 'cod')
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 text-green-900 text-sm">
+            <p class="font-semibold mb-1">Pesanan sedang diproses</p>
+            <p>Pembayaran dilakukan saat barang diterima (COD). Tidak perlu konfirmasi pembayaran terlebih dahulu.</p>
+        </div>
     @endif
 
     <a href="{{ route('orders.index') }}" class="inline-block mt-4 text-blue-600 hover:underline">← Kembali ke Daftar Pesanan</a>

@@ -35,6 +35,7 @@ class PaymentResource extends Resource
                     ->formatStateUsing(fn (?string $state) => match ($state) {
                         'cod' => 'COD',
                         'bank_transfer' => 'Transfer Bank',
+                        'qris' => 'QRIS',
                         default => $state ?? '-',
                     }),
                 Tables\Columns\TextColumn::make('bankAccount.name')

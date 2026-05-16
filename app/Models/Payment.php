@@ -32,6 +32,8 @@ class Payment extends Model
 
     public const METHOD_BANK_TRANSFER = 'bank_transfer';
 
+    public const METHOD_QRIS = 'qris';
+
     /** Status pembayaran */
     public const STATUS_PENDING = 'pending';
 
@@ -71,8 +73,8 @@ class Payment extends Model
      */
     public function markTransferReportedByCustomer(): void
     {
-        if ($this->method !== self::METHOD_BANK_TRANSFER) {
-            throw new \RuntimeException('Hanya pembayaran transfer bank yang dapat ditandai.');
+        if (! in_array($this->method, [self::METHOD_BANK_TRANSFER, self::METHOD_QRIS], true)) {
+            throw new \RuntimeException('Hanya pembayaran transfer bank atau QRIS yang dapat ditandai.');
         }
 
         if ($this->status !== self::STATUS_PENDING) {
